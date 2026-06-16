@@ -37,6 +37,8 @@ td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:
 .pp{font-size:11px;font-weight:700}.cc{font-size:10px;color:var(--mut);font-weight:600}
 .gtot td{background:#11162a;font-weight:700;border-top:1px solid rgba(79,140,255,.4)}.gtot td .pp{color:#bcd0ff}
 .tot td{background:#10141f;font-weight:700}.muted{color:var(--mut)}
+.plan td{text-align:left}.plan .vol{text-align:right;font-weight:700;white-space:nowrap}
+.recycle{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}.recycle .big{font-size:30px;font-weight:800;color:var(--accent)}.recycle .it{font-size:12.5px;color:var(--mut)}.recycle .it b{color:var(--txt)}
 .notes{color:var(--mut);font-size:12px;line-height:1.7;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}.notes b{color:var(--txt)}
 .empty{padding:36px;text-align:center;color:var(--mut)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(5,7,14,.72);z-index:1000;align-items:center;justify-content:center;padding:18px}
@@ -58,6 +60,7 @@ td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:
   <h2 class="sh">Pipeline State</h2><div class="cards" id="pipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="cards"></div>
   <h2 class="sh">Stage × Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
+  <h2 class="sh">Treatment Plan</h2><div id="plan"></div><div class="recycle" id="recycle"></div>
   <div class="notes" id="notes"></div>
 </div>
 <div id="dealsView" style="display:none">
@@ -65,6 +68,7 @@ td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:
   <h2 class="sh">Deal Stage</h2><div class="cards" id="dpipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="dcards"></div>
   <h2 class="sh">Stage × Rating Heatmap</h2><div class="insight" id="dinsight"></div><div id="dheat"></div>
+  <h2 class="sh">Deal Value by Stage</h2><div id="dplan"></div><div class="recycle" id="dvalue"></div>
   <div class="notes" id="dnotes"></div>
 </div>
 <div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">✕</span></div><div class="modalbody" id="modalBody"></div></div></div>
@@ -97,6 +101,11 @@ function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const 
 function pipeHTML(data,GROUPS,COL,DESC){const tot=data.length||1;return GROUPS.map(g=>{const v=data.filter(x=>x.g===g).length;return `<div class="pc" style="border-top-color:${COL[g]}"><div><span class="v">${v.toLocaleString()}</span><span class="pct" style="color:${COL[g]}">${pct(v,tot)}%</span></div><div class="nm">${g}</div><div class="ds">${DESC[g]}</div></div>`;}).join("");}
 function tierCardsHTML(data,TIERS,TLIST){const tot=data.length||1;return TIERS.map(t=>{const v=data.filter(x=>x.t===t).length;const li=(TLIST[t]||[]).map(r=>`<li>${r}</li>`).join("");return `<div class="kc" style="border-top-color:${TIERCOL[t]}"><div class="kcrow"><div><div class="v" style="color:${TIERCOL[t]}">${v.toLocaleString()}</div><div class="l">${pct(v,tot)}% of view</div></div><ul class="rl">${li}</ul></div></div>`;}).join("");}
 
+const TREATMENT=[{name:"Disqualified",stages:["Disqualified"],action:"Last spray &amp; pray pass with Connie; log + close.",why:"Visibility &amp; documentation"},{name:"Junk Lead",stages:["Junk Lead"],action:"Skip — no action.",why:"Already discarded purposefully"},{name:"The Ladder",stages:["The Ladder"],action:"No action — routed to partners.",why:"Out of scope"},{name:"Unresponsive",stages:["Unresponsive"],action:"Connie calling pass.",why:"Low-cost, high-yield bot filtering"},{name:"Bad Contact Info",stages:["Bad Contact Info"],action:"Enrich first, then call if valid.",why:"Avoids wasted credits"},{name:"Buying Window Closed",stages:["Buying Window Closed"],action:"Re-open + Connie if active.",why:"Tax market recycles annually"},{name:"Warm Stages (Reaching–SQL)",stages:["Reaching","Opened","Replied","Booked","Open to Buy SQL"],action:"Human-led + bot support.",why:"Leverage existing warmth"},{name:"Inbound MQL + Routing",stages:["Inbound MQL","Routing"],action:"Standard Connie flow.",why:"Normal funnel entry"},{name:"Nurture",stages:["Nurture"],action:"Maintain existing cadence.",why:"Marginal volume"}];
+function lPlanHTML(data){const tot=data.length||1;const rd=TREATMENT.map(b=>({n:b.name,a:b.action,w:b.why,v:data.filter(x=>b.stages.indexOf(x.s)>=0).length})).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Bucket</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;for(const b of rd){h+=`<tr><td><b>${b.n}</b></td><td class="vol">${b.v.toLocaleString()} · ${pct(b.v,tot)}%</td><td>${b.a}</td><td class="muted">${b.w}</td></tr>`;}return h+`</tbody></table></div>`;}
+function lRecycleHTML(data){const RS=["Unresponsive","Bad Contact Info","Buying Window Closed","Disqualified"];const parts=RS.map(s=>({s,v:data.filter(x=>x.s===s).length}));const total=parts.reduce((a,p)=>a+p.v,0);return `<div><div class="big">${total.toLocaleString()}</div><div class="it">Total recycling target</div></div>`+parts.map(p=>`<div class="it"><b>${p.v.toLocaleString()}</b> &nbsp;${p.s}</div>`).join("");}
+function dPlanHTML(data){const tot=data.length||1;const ALL=[].concat(META.dopen,META.dwon,META.dlost);const rd=ALL.filter(s=>data.some(x=>x.s===s)).map(s=>{const ds=data.filter(x=>x.s===s);const amt=ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return {s,v:ds.length,amt};}).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Deals</th><th style="text-align:right">Total Amount</th><th style="text-align:right">Avg</th></tr></thead><tbody>`;for(const r of rd){h+=`<tr><td><b>${r.s}</b></td><td class="vol">${r.v.toLocaleString()} · ${pct(r.v,tot)}%</td><td class="vol">${r.amt?'$'+Math.round(r.amt).toLocaleString():'—'}</td><td class="vol">${r.v&&r.amt?'$'+Math.round(r.amt/r.v).toLocaleString():'—'}</td></tr>`;}return h+`</tbody></table></div>`;}
+function dValueHTML(data){const g=(grp)=>{const ds=data.filter(x=>x.g===grp);return {n:ds.length,amt:ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0)};};const won=g("Won"),lost=g("Lost"),op=g("Open / In Progress");const tot=data.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return `<div><div class="big">$${Math.round(tot).toLocaleString()}</div><div class="it">Total deal value (${data.length} deals)</div></div><div class="it"><b>$${Math.round(won.amt).toLocaleString()}</b> &nbsp;Won (${won.n})</div><div class="it"><b>$${Math.round(op.amt).toLocaleString()}</b> &nbsp;Open (${op.n})</div><div class="it"><b>$${Math.round(lost.amt).toLocaleString()}</b> &nbsp;Lost (${lost.n})</div>`;}
 // ===== LEADS =====
 const LGROUPS=["Active Pipeline","Cold Pool","Off-board"];const LSTAGES={"Active Pipeline":META.active,"Cold Pool":META.cold,"Off-board":META.offboard};
 const LGCOL={"Active Pipeline":"#4f8cff","Cold Pool":"#a78bfa","Off-board":"#64748b"};
@@ -118,6 +127,7 @@ function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl]
   document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
   document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,"lDrill");
+  document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
   document.getElementById("notes").innerHTML=`<b>Leads — data notes.</b> Source: Soho CRM export (Standard layout, created ≥ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. Click any cell to open its leads (links to Zoho).`;}
 
 // ===== DEALS =====
@@ -138,6 +148,7 @@ function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
   document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
   document.getElementById("dinsight").innerHTML=insightHTML(d,DGROUPS,DSTAGES,META.dratings);
   document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,"dDrill");
+  document.getElementById("dplan").innerHTML=dPlanHTML(d);document.getElementById("dvalue").innerHTML=dValueHTML(d);
   document.getElementById("dnotes").innerHTML=`<b>Deals — data notes.</b> Source: Soho CRM deals export; <b>ratings pulled live from Zoho</b> (post-backfill: 304 rated, 355 not set). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
 
 lSel=new Set(lOwnersOf("All"));lRender();
