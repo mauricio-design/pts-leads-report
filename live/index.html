@@ -23,6 +23,7 @@ h2.sh{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu
 .pc .v{font-size:26px;font-weight:700;line-height:1}.pc .pct{font-size:13px;font-weight:700;margin-left:8px}.pc .nm{font-weight:700;margin:6px 0 4px}.pc .ds{color:var(--mut);font-size:11px;line-height:1.5}
 .kc{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;border-top:3px solid}
 .kc .v{font-size:23px;font-weight:700;line-height:1}.kc .l{color:var(--mut);font-size:12px;margin-top:4px}
+.kc .tlabel{font-weight:700;font-size:13px;margin-bottom:9px;letter-spacing:.3px}
 .kcrow{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .rl{list-style:none;margin:0;padding:0;text-align:right;font-size:10.5px;color:var(--mut);line-height:1.55}.rl li{white-space:nowrap}
 .insight{background:linear-gradient(90deg,rgba(79,140,255,.12),transparent);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;margin:14px 0;font-size:13.5px}.insight b{color:#fff}
@@ -31,7 +32,8 @@ h2.sh{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu
 table{border-collapse:collapse;width:100%;background:var(--card)}
 th,td{padding:6px 9px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
 th{background:#10141f;color:var(--mut);font-size:11px}
-td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#141826;z-index:1;white-space:nowrap}
+td:first-child{text-align:left;position:sticky;left:0;background:#141826;z-index:1;white-space:nowrap}
+thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;background:#141826;z-index:1;white-space:nowrap}
 .rcol{font-size:11px;white-space:nowrap;font-weight:700}
 .rcol small{display:block;font-size:9px;font-weight:400;color:#6b779b;margin-top:2px}
 .tierhdr{cursor:pointer;user-select:none}.tierhdr:hover{background:#1a2235;color:#fff!important}
@@ -40,6 +42,7 @@ td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:
 .gtot td{background:#11162a;font-weight:700;border-top:1px solid rgba(79,140,255,.4)}.gtot td .pp{color:#bcd0ff}
 .tot td{background:#10141f;font-weight:700}.muted{color:var(--mut)}
 .plan td{text-align:left}.plan .vol{text-align:right;font-weight:700;white-space:nowrap}
+.plan .grouprow td{background:#11162a;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.6px;border-top:1px solid var(--line)}
 .recycle{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}.recycle .big{font-size:30px;font-weight:800;color:var(--accent)}.recycle .it{font-size:12.5px;color:var(--mut)}.recycle .it b{color:var(--txt)}
 .notes{color:var(--mut);font-size:12px;line-height:1.7;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}.notes b{color:var(--txt)}
 .empty{padding:36px;text-align:center;color:var(--mut)}
@@ -108,20 +111,25 @@ function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn){co
   return h+`</tbody></table></div>`;}
 function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} × ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`👁️ <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
 function pipeHTML(data,GROUPS,COL,DESC){const tot=data.length||1;return GROUPS.map(g=>{const v=data.filter(x=>x.g===g).length;return `<div class="pc" style="border-top-color:${COL[g]}"><div><span class="v">${v.toLocaleString()}</span><span class="pct" style="color:${COL[g]}">${pct(v,tot)}%</span></div><div class="nm">${g}</div><div class="ds">${DESC[g]}</div></div>`;}).join("");}
-function tierCardsHTML(data,TIERS,TLIST){const tot=data.length||1;return TIERS.map(t=>{const v=data.filter(x=>x.t===t).length;const li=(TLIST[t]||[]).map(r=>`<li>${r}</li>`).join("");return `<div class="kc" style="border-top-color:${TIERCOL[t]}"><div class="kcrow"><div><div class="v" style="color:${TIERCOL[t]}">${v.toLocaleString()}</div><div class="l">${pct(v,tot)}% of view</div></div><ul class="rl">${li}</ul></div></div>`;}).join("");}
+function tierCardsHTML(data,TIERS,TLIST){const tot=data.length||1;const TL={Top:'Top Tier',Mid:'Mid Tier',Bottom:'Bottom Tier',Unknown:'Unknown',None:'No Rating'};return TIERS.map(t=>{const v=data.filter(x=>x.t===t).length;const li=(TLIST[t]||[]).map(r=>`<li>${r}</li>`).join("");return `<div class="kc" style="border-top-color:${TIERCOL[t]}"><div class="tlabel" style="color:${TIERCOL[t]}">${TL[t]||t}</div><div class="kcrow"><div><div class="v" style="color:${TIERCOL[t]}">${v.toLocaleString()}</div><div class="l">${pct(v,tot)}% of view</div></div><ul class="rl">${li}</ul></div></div>`;}).join("");}
 
 const TREATMENT=[
- {name:"Inbound MQL + Routing",stages:["Inbound MQL","Routing"],action:"Standard Connie flow.",why:"Normal funnel entry"},
- {name:"Warm Stages (Reaching–SQL)",stages:["Reaching","Opened","Replied","Booked","Open to Buy SQL"],action:"Human-led + bot support.",why:"Leverage existing warmth"},
- {name:"Buying Window Closed",stages:["Buying Window Closed"],action:"Re-open + Connie if active.",why:"Backdoor — last active stage; re-enters the productive funnel"},
- {name:"Nurture",stages:["Nurture"],action:"Maintain existing cadence.",why:"Marginal volume"},
- {name:"Unresponsive",stages:["Unresponsive"],action:"Connie calling pass.",why:"Low-cost, high-yield bot filtering"},
- {name:"Bad Contact Info",stages:["Bad Contact Info"],action:"Enrich first, then call if valid.",why:"Avoids wasted credits"},
- {name:"The Ladder",stages:["The Ladder"],action:"No action — routed to partners.",why:"Out of scope"},
- {name:"Disqualified",stages:["Disqualified"],action:"Last spray &amp; pray pass with Connie; log + close.",why:"Visibility &amp; documentation"},
- {name:"Junk Lead",stages:["Junk Lead"],action:"Skip — no action (future: bot to re-check notes).",why:"Already discarded purposefully"},
+ {name:"Inbound MQL",stages:["Inbound MQL"],g:"Productive",action:"Standard Connie flow.",why:"Top of funnel — fresh inbound"},
+ {name:"Routing",stages:["Routing"],g:"Productive",action:"Auto-assign owner; Connie engages.",why:"Awaiting routing"},
+ {name:"Reaching",stages:["Reaching"],g:"Productive",action:"Active outreach (human + Connie).",why:"In contact attempt"},
+ {name:"Opened",stages:["Opened"],g:"Productive",action:"Continue outreach; nudge.",why:"Engaged — opened"},
+ {name:"Replied",stages:["Replied"],g:"Productive",action:"Human-led conversation.",why:"Hot — replied"},
+ {name:"Booked",stages:["Booked"],g:"Productive",action:"Confirm + prep appointment.",why:"Meeting booked"},
+ {name:"Open to Buy SQL",stages:["Open to Buy SQL"],g:"Productive",action:"Sales priority — push to deal.",why:"Sales-qualified"},
+ {name:"Buying Window Closed",stages:["Buying Window Closed"],g:"Productive",action:"Re-open + Connie if active.",why:"Backdoor — last active stage"},
+ {name:"Nurture",stages:["Nurture"],g:"Recycle",action:"Maintain existing cadence.",why:"Long-term nurture"},
+ {name:"Unresponsive",stages:["Unresponsive"],g:"Recycle",action:"Connie calling pass.",why:"Low-cost re-engagement"},
+ {name:"Bad Contact Info",stages:["Bad Contact Info"],g:"Recycle",action:"Enrich first, then call if valid.",why:"Avoids wasted credits"},
+ {name:"The Ladder",stages:["The Ladder"],g:"Disposal",action:"No action — routed to partners.",why:"Out of scope"},
+ {name:"Disqualified",stages:["Disqualified"],g:"Disposal",action:"Last spray &amp; pray pass with Connie; log + close.",why:"Visibility &amp; documentation"},
+ {name:"Junk Lead",stages:["Junk Lead"],g:"Disposal",action:"Skip — no action (future: bot re-check notes).",why:"Already discarded purposefully"},
 ];
-function lPlanHTML(data){const tot=data.length||1;const rd=TREATMENT.map(b=>({n:b.name,a:b.action,w:b.why,v:data.filter(x=>b.stages.indexOf(x.s)>=0).length}));let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Bucket</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;for(const b of rd){h+=`<tr><td><b>${b.n}</b></td><td class="vol">${b.v.toLocaleString()} · ${pct(b.v,tot)}%</td><td>${b.a}</td><td class="muted">${b.w}</td></tr>`;}return h+`</tbody></table></div>`;}
+function lPlanHTML(data){const tot=data.length||1;const GC={Productive:"#4f8cff",Recycle:"#a78bfa",Disposal:"#64748b"};const GL={Productive:"Productive Stages",Recycle:"Recycle Stages",Disposal:"Disposal Stages"};let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;let cg=null;for(const b of TREATMENT){if(b.g!==cg){cg=b.g;h+=`<tr class="grouprow"><td colspan="4" style="color:${GC[cg]}">${GL[cg]}</td></tr>`;}const v=data.filter(x=>b.stages.indexOf(x.s)>=0).length;h+=`<tr><td><b>${b.name}</b></td><td class="vol">${v.toLocaleString()} · ${pct(v,tot)}%</td><td>${b.action}</td><td class="muted">${b.why}</td></tr>`;}return h+`</tbody></table></div>`;}
 function lRecycleHTML(data){const RS=["Nurture","Unresponsive","Bad Contact Info","Disqualified"];const parts=RS.map(s=>({s,v:data.filter(x=>x.s===s).length}));const total=parts.reduce((a,p)=>a+p.v,0);return `<div><div class="big">${total.toLocaleString()}</div><div class="it">Total recycling target</div></div>`+parts.map(p=>`<div class="it"><b>${p.v.toLocaleString()}</b> &nbsp;${p.s}</div>`).join("");}
 function dPlanHTML(data){const tot=data.length||1;const ALL=[].concat(META.dopen,META.dwon,META.dlost);const rd=ALL.filter(s=>data.some(x=>x.s===s)).map(s=>{const ds=data.filter(x=>x.s===s);const amt=ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return {s,v:ds.length,amt};}).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Deals</th><th style="text-align:right">Total Amount</th><th style="text-align:right">Avg</th></tr></thead><tbody>`;for(const r of rd){h+=`<tr><td><b>${r.s}</b></td><td class="vol">${r.v.toLocaleString()} · ${pct(r.v,tot)}%</td><td class="vol">${r.amt?'$'+Math.round(r.amt).toLocaleString():'—'}</td><td class="vol">${r.v&&r.amt?'$'+Math.round(r.amt/r.v).toLocaleString():'—'}</td></tr>`;}return h+`</tbody></table></div>`;}
 function dValueHTML(data){const g=(grp)=>{const ds=data.filter(x=>x.g===grp);return {n:ds.length,amt:ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0)};};const won=g("Won"),lost=g("Lost"),op=g("Open / In Progress");const tot=data.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return `<div><div class="big">$${Math.round(tot).toLocaleString()}</div><div class="it">Total deal value (${data.length} deals)</div></div><div class="it"><b>$${Math.round(won.amt).toLocaleString()}</b> &nbsp;Won (${won.n})</div><div class="it"><b>$${Math.round(op.amt).toLocaleString()}</b> &nbsp;Open (${op.n})</div><div class="it"><b>$${Math.round(lost.amt).toLocaleString()}</b> &nbsp;Lost (${lost.n})</div>`;}
