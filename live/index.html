@@ -38,11 +38,11 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 .rcol small{display:block;font-size:9px;font-weight:400;color:#6b779b;margin-top:2px}
 .tierhdr{cursor:pointer;user-select:none}.tierhdr:hover{background:#1a2235;color:#fff!important}
 .cell{cursor:pointer}.cell:hover{outline:2px solid var(--accent);outline-offset:-2px}.cell.z{color:#39415e;cursor:default}
-.pp{font-size:11px;font-weight:700}.cc{font-size:10px;color:var(--mut);font-weight:600}
-.gtot td{background:#11162a;font-weight:700;border-top:1px solid rgba(79,140,255,.4)}.gtot td .pp{color:#bcd0ff}
-.tot td{background:#10141f;font-weight:700}.muted{color:var(--mut)}
+.pp{font-size:11px;font-weight:700}.cc{font-size:10px;opacity:.72;font-weight:600}
+.gtot td{background:#27324c;font-weight:700;border-top:1px solid rgba(110,168,255,.45)}.gtot td:first-child{background:#27324c}.gtot td .pp{color:#dce6ff}.rowtot{background:#202a42;font-weight:700}
+.tot td{background:#313f63;font-weight:700;border-top:2px solid var(--accent)}.tot td:first-child{background:#313f63}.muted{color:var(--mut)}
 .plan td{text-align:left}.plan .vol{text-align:right;font-weight:700;white-space:nowrap}
-.plan .grouprow td{background:#11162a;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.6px;border-top:1px solid var(--line)}
+.plan .grouprow td{background:#27324c;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.6px;border-top:2px solid rgba(110,168,255,.4)}
 .recycle{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}.recycle .big{font-size:30px;font-weight:800;color:var(--accent)}.recycle .it{font-size:12.5px;color:var(--mut)}.recycle .it b{color:var(--txt)}
 .notes{color:var(--mut);font-size:12px;line-height:1.7;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}.notes b{color:var(--txt)}
 .empty{padding:36px;text-align:center;color:var(--mut)}
@@ -82,6 +82,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 let LEADS=[],DEALS=[];const LEADS_URL="https://n8n.pts-automation.cloud/webhook/report-leads-live",DEALS_URL="https://n8n.pts-automation.cloud/webhook/report-deals-live";
 const META={"total": 5638, "dtotal": 659, "snapshot": "2026-06-16", "org": "org55336697", "productive": ["Inbound MQL", "Routing", "Reaching", "Opened", "Replied", "Booked", "Open to Buy SQL", "Buying Window Closed"], "recycle": ["Nurture", "Unresponsive", "Bad Contact Info"], "disposal": ["The Ladder", "Disqualified", "Junk Lead"], "tiers": ["Top", "Mid", "Bottom", "Unknown"], "tierList": {"Top": ["Unicorn (200+ BP)", "Ideal (100-199 BP)", "Good (50-99 BP)"], "Mid": ["Fair (20-49 BP)", "Borderline (10-19 BP)"], "Bottom": ["Low Fit (1-9 BP)", "Non ICP (0BP)", "Cross-Sell (0BP)"], "Unknown": ["Unknown"]}, "ratings": [{"r": "Unicorn (200+ BP)", "short": "Unicorn", "bp": "200+ BP", "tier": "Top"}, {"r": "Ideal (100-199 BP)", "short": "Ideal", "bp": "100-199 BP", "tier": "Top"}, {"r": "Good (50-99 BP)", "short": "Good", "bp": "50-99 BP", "tier": "Top"}, {"r": "Fair (20-49 BP)", "short": "Fair", "bp": "20-49 BP", "tier": "Mid"}, {"r": "Borderline (10-19 BP)", "short": "Borderline", "bp": "10-19 BP", "tier": "Mid"}, {"r": "Low Fit (1-9 BP)", "short": "Low Fit", "bp": "1-9 BP", "tier": "Bottom"}, {"r": "Non ICP (0BP)", "short": "Non ICP", "bp": "0 BP", "tier": "Bottom"}, {"r": "Unknown", "short": "Unknown", "bp": "", "tier": "Unknown"}], "dopen": ["Proposal", "Contract Out", "Onboarding"], "dwon": ["Won"], "dlost": ["Seasonal Hold", "Lost"], "dtiers": ["Top", "Mid", "Bottom", "None"], "dtierList": {"Top": ["Unicorn (200+ BP)", "Ideal (100-199 BP)", "Good (50-99 BP)"], "Mid": ["Fair (20-49 BP)", "Borderline (10-19 BP)"], "Bottom": ["Low Fit (1-9 BP)", "Non ICP (0BP)", "Cross-Sell (0BP)"], "None": ["(rating not set)"]}, "dratings": [{"r": "Unicorn (200+ BP)", "short": "Unicorn", "bp": "200+ BP", "tier": "Top"}, {"r": "Ideal (100-199 BP)", "short": "Ideal", "bp": "100-199 BP", "tier": "Top"}, {"r": "Good (50-99 BP)", "short": "Good", "bp": "50-99 BP", "tier": "Top"}, {"r": "Fair (20-49 BP)", "short": "Fair", "bp": "20-49 BP", "tier": "Mid"}, {"r": "Borderline (10-19 BP)", "short": "Borderline", "bp": "10-19 BP", "tier": "Mid"}, {"r": "Low Fit (1-9 BP)", "short": "Low Fit", "bp": "1-9 BP", "tier": "Bottom"}, {"r": "Non ICP (0BP)", "short": "Non ICP", "bp": "0 BP", "tier": "Bottom"}, {"r": "No Rating", "short": "No Rating", "bp": "", "tier": "None"}]};
 const TIERCOL={Top:"#22c55e",Mid:"#eab308",Bottom:"#ef4444",Unknown:"#64748b",None:"#64748b"};
+function heatColor(t){const a=[31,45,74],b=[112,170,255];const c=a.map((x,i)=>Math.round(x+(b[i]-x)*t));return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
 function fdays(cr){if(!cr)return null;const d=new Date(cr+"T00:00:00");if(isNaN(d.getTime()))return null;return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000));}
 function pct(v,t){return t?Math.round(v/t*100):0;}
 function closeModal(){document.getElementById("overlay").style.display="none";}
@@ -89,7 +90,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function showSection(s){document.getElementById("leadsView").style.display=s==="leads"?"block":"none";document.getElementById("dealsView").style.display=s==="deals"?"block":"none";document.getElementById("secLeads").classList.toggle("active",s==="leads");document.getElementById("secDeals").classList.toggle("active",s==="deals");}
 function ownerChips(data,sel,fn,el){const c={};for(const x of data)c[x.o]=(c[x.o]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);
   document.getElementById(el).innerHTML='<span class="lbl">Owners (click to toggle):</span>'+arr.map(([o,n])=>`<span class="ochip ${sel.has(o)?'on':'off'}" onclick="${fn}('${o.replace(/'/g,"\\'")}')"><span class="cdot"></span><b>${o}</b><span class="oc">${n.toLocaleString()}</span></span>`).join("");}
-function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn){const tot=data.length||1;
+function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn,GCOL){const tot=data.length||1;
   const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}
   for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}
   const byTier={};for(const c of RATINGS){(byTier[c.tier]=byTier[c.tier]||[]).push(c);}
@@ -105,8 +106,8 @@ function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn){co
   let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' ▾':' ▸'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
   h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings ▸</small></th>`).join("")+`</tr></thead><tbody>`;
   for(const g of GROUPS){for(const s of STAGES[g]){const rc=RATINGS.reduce((a,c)=>a+m[s][c.r],0);
-    h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">·</td>`;const al=(0.12+0.78*(v/max)).toFixed(2);const arg=col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;return `<td class="cell" style="background:rgba(79,140,255,${al})" onclick="${drillFn}(${arg})">${f(v)}</td>`;}).join("")+`<td class="tot">${f(rc)}</td></tr>`;}
-    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td>${g} · Group Total</td>`+cols.map(col=>{const v=dv(col,gd);return `<td>${v?f(v):'·'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
+    h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">·</td>`;const t=0.15+0.85*Math.sqrt(v/max);const txt=t>0.8?'#0e1018':'#eaf0ff';const arg=col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;return `<td class="cell" style="background:${heatColor(t)};color:${txt}" onclick="${drillFn}(${arg})">${f(v)}</td>`;}).join("")+`<td class="rowtot">${f(rc)}</td></tr>`;}
+    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td style="color:${(GCOL&&GCOL[g])||'#dce6ff'};border-left:3px solid ${(GCOL&&GCOL[g])||'#4f8cff'}">${g} · Group Total</td>`+cols.map(col=>{const v=dv(col,gd);return `<td>${v?f(v):'·'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
   h+=`<tr class="tot"><td>Column Total</td>`+cols.map(col=>{const v=dv(col,data);return `<td>${f(v)}</td>`;}).join("")+`<td>${f(data.length)}</td></tr>`;
   return h+`</tbody></table></div>`;}
 function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} × ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`👁️ <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
@@ -155,7 +156,7 @@ function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl]
   const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
   document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
-  document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,META.tiers,"lDrill",lExpanded,"lToggleTier");
+  document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,META.tiers,"lDrill",lExpanded,"lToggleTier",LGCOL);
   document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
   document.getElementById("notes").innerHTML=`<b>Leads — data notes.</b> Source: Soho CRM export (Standard layout, created ≥ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> — click a tier header (▸) to expand it into its individual ratings. Click any cell to open its leads (links to Zoho).`;}
 
@@ -177,7 +178,7 @@ function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
   document.getElementById("dpipe").innerHTML=pipeHTML(d,DGROUPS,DGCOL,DGDESC);
   document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
   document.getElementById("dinsight").innerHTML=insightHTML(d,DGROUPS,DSTAGES,META.dratings);
-  document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,META.dtiers,"dDrill",dExpanded,"dToggleTier");
+  document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,META.dtiers,"dDrill",dExpanded,"dToggleTier",DGCOL);
   document.getElementById("dplan").innerHTML=dPlanHTML(d);document.getElementById("dvalue").innerHTML=dValueHTML(d);
   document.getElementById("dnotes").innerHTML=`<b>Deals — data notes.</b> Source: Soho CRM deals export (${META.snapshot}; 304 rated, 355 not set). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
 
