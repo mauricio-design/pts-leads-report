@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PTS — Lead & Deal Pipeline Report</title>
+<style>
+:root{--bg:#0e1018;--panel:#151926;--card:#1a1f30;--line:#2a3147;--txt:#e8ebf5;--mut:#94a0c0;--accent:#4f8cff;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:22px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}.brand h1{font-size:20px;margin:0}.brand .tag{background:#16a34a;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.sub{color:var(--mut);font-size:12.5px;margin-bottom:16px}
+.sections{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.sec{padding:11px 22px;border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;background:var(--panel);color:var(--mut);cursor:pointer;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;position:relative;top:1px}
+.sec.active{background:var(--card);color:var(--txt)}.sec.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent)}
+h2.sh{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin:26px 0 10px;border-left:3px solid var(--accent);padding-left:10px}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 15px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--mut);cursor:pointer;font-weight:600}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.tab .c{opacity:.75;font-weight:400;margin-left:6px}
+.ochips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:center}.ochips .lbl{color:var(--mut);font-size:12px;font-weight:600;margin-right:2px}
+.ochip{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;background:var(--card)}
+.ochip .cdot{width:9px;height:9px;border-radius:50%;background:var(--accent)}.ochip b{color:var(--txt)}.ochip .oc{color:var(--accent);font-weight:700}
+.ochip.on{border-color:var(--accent);background:rgba(79,140,255,.14)}.ochip.off{opacity:.5;border-style:dashed}.ochip.off .cdot{background:#444c66}.ochip.off b{color:var(--mut)}.ochip.off .oc{color:var(--mut)}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.pc{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;border-top:3px solid}
+.pc .v{font-size:26px;font-weight:700;line-height:1}.pc .pct{font-size:13px;font-weight:700;margin-left:8px}.pc .nm{font-weight:700;margin:6px 0 4px}.pc .ds{color:var(--mut);font-size:11px;line-height:1.5}
+.kc{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;border-top:3px solid}
+.kc .v{font-size:23px;font-weight:700;line-height:1}.kc .l{color:var(--mut);font-size:12px;margin-top:4px}
+.kcrow{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.rl{list-style:none;margin:0;padding:0;text-align:right;font-size:10.5px;color:var(--mut);line-height:1.55}.rl li{white-space:nowrap}
+.insight{background:linear-gradient(90deg,rgba(79,140,255,.12),transparent);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;margin:14px 0;font-size:13.5px}.insight b{color:#fff}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.hscroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;background:var(--card)}
+th,td{padding:6px 9px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+th{background:#10141f;color:var(--mut);font-size:11px}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#141826;z-index:1;white-space:nowrap}
+.rcol{font-size:10px;white-space:nowrap;font-weight:600}
+.cell{cursor:pointer}.cell:hover{outline:2px solid var(--accent);outline-offset:-2px}.cell.z{color:#39415e;cursor:default}
+.pp{font-size:11px;font-weight:700}.cc{font-size:10px;color:var(--mut);font-weight:600}
+.gtot td{background:#11162a;font-weight:700;border-top:1px solid rgba(79,140,255,.4)}.gtot td .pp{color:#bcd0ff}
+.tot td{background:#10141f;font-weight:700}.muted{color:var(--mut)}
+.plan td{text-align:left}.plan .vol{text-align:right;font-weight:700;white-space:nowrap}
+.recycle{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}.recycle .big{font-size:30px;font-weight:800;color:var(--accent)}.recycle .it{font-size:12.5px;color:var(--mut)}.recycle .it b{color:var(--txt)}
+.notes{color:var(--mut);font-size:12px;line-height:1.7;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}.notes b{color:var(--txt)}
+.empty{padding:36px;text-align:center;color:var(--mut)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(5,7,14,.72);z-index:1000;align-items:center;justify-content:center;padding:18px}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(1180px,97%);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.modalhdr{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line)}.modalhdr b{font-size:16px}
+.x{cursor:pointer;color:var(--mut);font-size:18px;padding:4px 10px;border-radius:8px}.x:hover{background:var(--card);color:var(--txt)}
+.modalbody{overflow:auto}
+.dt{font-size:12.5px}.dt th{position:sticky;top:0;z-index:2}.dt td{text-align:left;border-right:none;white-space:nowrap}.dt td:first-child{position:static;background:transparent}
+.dt a{color:var(--accent);text-decoration:none;font-weight:600}.dt a:hover{text-decoration:underline}
+</style></head><body><div class="wrap">
+<div class="brand"><h1>PTS — Lead &amp; Deal Pipeline Report</h1><span class="tag">LIVE</span></div>
+<div class="sub" id="sub"></div>
+<div class="sections">
+  <div class="sec active" id="secLeads" onclick="showSection('leads')">📊 Leads</div>
+  <div class="sec" id="secDeals" onclick="showSection('deals')">📁 Deals</div>
+</div>
+<div id="leadsView">
+  <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div>
+  <h2 class="sh">Pipeline State</h2><div class="cards" id="pipe"></div>
+  <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="cards"></div>
+  <h2 class="sh">Stage × Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
+  <h2 class="sh">Treatment Plan</h2><div id="plan"></div><div class="recycle" id="recycle"></div>
+  <div class="notes" id="notes"></div>
+</div>
+<div id="dealsView" style="display:none">
+  <div class="ochips" id="downers"></div>
+  <h2 class="sh">Deal Stage</h2><div class="cards" id="dpipe"></div>
+  <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="dcards"></div>
+  <h2 class="sh">Stage × Rating Heatmap</h2><div class="insight" id="dinsight"></div><div id="dheat"></div>
+  <h2 class="sh">Deal Value by Stage</h2><div id="dplan"></div><div class="recycle" id="dvalue"></div>
+  <div class="notes" id="dnotes"></div>
+</div>
+<div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">✕</span></div><div class="modalbody" id="modalBody"></div></div></div>
+</div>
+<script>
+let LEADS=[],DEALS=[];const LEADS_URL="https://n8n.pts-automation.cloud/webhook/report-leads-live",DEALS_URL="https://n8n.pts-automation.cloud/webhook/report-deals-live";
+const META={"total": 5638, "dtotal": 659, "snapshot": "2026-06-16", "org": "org55336697", "active": ["Inbound MQL", "Routing", "Reaching", "Opened", "Replied", "Booked", "Open to Buy SQL", "Nurture"], "cold": ["Buying Window Closed", "Unresponsive", "Bad Contact Info"], "offboard": ["The Ladder", "Disqualified", "Junk Lead"], "tiers": ["Top", "Mid", "Bottom", "Unknown"], "tierList": {"Top": ["Unicorn (200+)", "Ideal (100-199)", "Good (50-99)"], "Mid": ["Fair (20-49)", "Borderline (10-19)", "Borderline (1-19)"], "Bottom": ["Low Fit (1-9)", "Low Fit (0)", "Non ICP (0)", "Cross-Sell (0)"], "Unknown": ["Unknown"]}, "ratings": [{"r": "Unicorn (200+ BP)", "short": "Unicorn", "tier": "Top"}, {"r": "Ideal (100-199 BP)", "short": "Ideal", "tier": "Top"}, {"r": "Good (50-99 BP)", "short": "Good", "tier": "Top"}, {"r": "Fair (20-49 BP)", "short": "Fair", "tier": "Mid"}, {"r": "Borderline (10-19 BP)", "short": "Border 10-19", "tier": "Mid"}, {"r": "Borderline (1-19 BP)", "short": "Border 1-19", "tier": "Mid"}, {"r": "Low Fit (1-9 BP)", "short": "Low Fit 1-9", "tier": "Bottom"}, {"r": "Low Fit (0 BP)", "short": "Low Fit 0", "tier": "Bottom"}, {"r": "Non ICP (0BP)", "short": "Non ICP", "tier": "Bottom"}, {"r": "Unknown", "short": "Unknown", "tier": "Unknown"}], "dopen": ["Proposal", "Contract Out", "Onboarding"], "dwon": ["Won"], "dlost": ["Seasonal Hold", "Lost"], "dtiers": ["Top", "Mid", "Bottom", "None"], "dtierList": {"Top": ["Unicorn (200+)", "Ideal (100-199)", "Good (50-99)"], "Mid": ["Fair (20-49)", "Borderline (10-19)"], "Bottom": ["Low Fit (1-9)", "Non ICP (0)"], "None": ["(rating not set)"]}, "dratings": [{"r": "Unicorn (200+ BP)", "short": "Unicorn", "tier": "Top"}, {"r": "Ideal (100-199 BP)", "short": "Ideal", "tier": "Top"}, {"r": "Good (50-99 BP)", "short": "Good", "tier": "Top"}, {"r": "Fair (20-49 BP)", "short": "Fair", "tier": "Mid"}, {"r": "Borderline (10-19 BP)", "short": "Border 10-19", "tier": "Mid"}, {"r": "Low Fit (1-9 BP)", "short": "Low Fit 1-9", "tier": "Bottom"}, {"r": "Non ICP (0BP)", "short": "Non ICP", "tier": "Bottom"}, {"r": "No Rating", "short": "No Rating", "tier": "None"}]};
+const TIERCOL={Top:"#22c55e",Mid:"#eab308",Bottom:"#ef4444",Unknown:"#64748b",None:"#64748b"};
+function fdays(cr){if(!cr)return null;const d=new Date(cr+"T00:00:00");if(isNaN(d.getTime()))return null;return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000));}
+function pct(v,t){return t?Math.round(v/t*100):0;}
+document.getElementById("sub").textContent=META.total.toLocaleString()+" leads · "+META.dtotal.toLocaleString()+" deals · snapshot "+META.snapshot+" (ratings live from Zoho)";
+function showSection(s){document.getElementById("leadsView").style.display=s==="leads"?"block":"none";document.getElementById("dealsView").style.display=s==="deals"?"block":"none";document.getElementById("secLeads").classList.toggle("active",s==="leads");document.getElementById("secDeals").classList.toggle("active",s==="deals");}
+function closeModal(){document.getElementById("overlay").style.display="none";}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+function ownerChips(data,sel,fn,el){const c={};for(const x of data)c[x.o]=(c[x.o]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  document.getElementById(el).innerHTML='<span class="lbl">Owners (click to toggle):</span>'+arr.map(([o,n])=>`<span class="ochip ${sel.has(o)?'on':'off'}" onclick="${fn}('${o.replace(/'/g,"\\'")}')"><span class="cdot"></span><b>${o}</b><span class="oc">${n.toLocaleString()}</span></span>`).join("");}
+function heatHTML(data,GROUPS,STAGES,RATINGS,drillFn){const tot=data.length||1;
+  const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}
+  for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}
+  let max=1;for(const s in m)for(const c of RATINGS)max=Math.max(max,m[s][c.r]);
+  const tg=[];let cur=null;for(const c of RATINGS){if(!cur||cur.tier!==c.tier){cur={tier:c.tier,n:0};tg.push(cur);}cur.n++;}
+  const f=(v)=>`<div class="pp">${(v/tot*100).toFixed(2)}%</div><div class="cc">${v.toLocaleString()}</div>`;
+  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tg.map(g=>`<th colspan="${g.n}" style="color:${TIERCOL[g.tier]}">${g.tier==='None'?'No Rating':g.tier+' Tier'}</th>`).join("")+`<th rowspan="2">Row Total</th></tr>`;
+  h+=`<tr>`+RATINGS.map(c=>`<th class="rcol"><span class=dot style="background:${TIERCOL[c.tier]}"></span>${c.short}</th>`).join("")+`</tr></thead><tbody>`;
+  for(const g of GROUPS){for(const s of STAGES[g]){const rc=RATINGS.reduce((a,c)=>a+m[s][c.r],0);
+    h+=`<tr><td>${s}</td>`+RATINGS.map(c=>{const v=m[s][c.r];if(!v)return `<td class="cell z">·</td>`;const al=(0.12+0.78*(v/max)).toFixed(2);return `<td class="cell" style="background:rgba(79,140,255,${al})" onclick="${drillFn}('${s.replace(/'/g,"")}','${c.r.replace(/'/g,"")}')">${f(v)}</td>`;}).join("")+`<td class="tot">${f(rc)}</td></tr>`;}
+    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td>${g} · Group Total</td>`+RATINGS.map(c=>{const v=gd.filter(x=>x.r===c.r).length;return `<td>${v?f(v):'·'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
+  h+=`<tr class="tot"><td>Column Total</td>`+RATINGS.map(c=>{const v=data.filter(x=>x.r===c.r).length;return `<td>${f(v)}</td>`;}).join("")+`<td>${f(data.length)}</td></tr>`;
+  h+=`</tbody></table></div>`;return h;}
+function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} × ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`👁️ <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
+function pipeHTML(data,GROUPS,COL,DESC){const tot=data.length||1;return GROUPS.map(g=>{const v=data.filter(x=>x.g===g).length;return `<div class="pc" style="border-top-color:${COL[g]}"><div><span class="v">${v.toLocaleString()}</span><span class="pct" style="color:${COL[g]}">${pct(v,tot)}%</span></div><div class="nm">${g}</div><div class="ds">${DESC[g]}</div></div>`;}).join("");}
+function tierCardsHTML(data,TIERS,TLIST){const tot=data.length||1;return TIERS.map(t=>{const v=data.filter(x=>x.t===t).length;const li=(TLIST[t]||[]).map(r=>`<li>${r}</li>`).join("");return `<div class="kc" style="border-top-color:${TIERCOL[t]}"><div class="kcrow"><div><div class="v" style="color:${TIERCOL[t]}">${v.toLocaleString()}</div><div class="l">${pct(v,tot)}% of view</div></div><ul class="rl">${li}</ul></div></div>`;}).join("");}
+
+const TREATMENT=[{name:"Disqualified",stages:["Disqualified"],action:"Last spray &amp; pray pass with Connie; log + close.",why:"Visibility &amp; documentation"},{name:"Junk Lead",stages:["Junk Lead"],action:"Skip — no action.",why:"Already discarded purposefully"},{name:"The Ladder",stages:["The Ladder"],action:"No action — routed to partners.",why:"Out of scope"},{name:"Unresponsive",stages:["Unresponsive"],action:"Connie calling pass.",why:"Low-cost, high-yield bot filtering"},{name:"Bad Contact Info",stages:["Bad Contact Info"],action:"Enrich first, then call if valid.",why:"Avoids wasted credits"},{name:"Buying Window Closed",stages:["Buying Window Closed"],action:"Re-open + Connie if active.",why:"Tax market recycles annually"},{name:"Warm Stages (Reaching–SQL)",stages:["Reaching","Opened","Replied","Booked","Open to Buy SQL"],action:"Human-led + bot support.",why:"Leverage existing warmth"},{name:"Inbound MQL + Routing",stages:["Inbound MQL","Routing"],action:"Standard Connie flow.",why:"Normal funnel entry"},{name:"Nurture",stages:["Nurture"],action:"Maintain existing cadence.",why:"Marginal volume"}];
+function lPlanHTML(data){const tot=data.length||1;const rd=TREATMENT.map(b=>({n:b.name,a:b.action,w:b.why,v:data.filter(x=>b.stages.indexOf(x.s)>=0).length})).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Bucket</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;for(const b of rd){h+=`<tr><td><b>${b.n}</b></td><td class="vol">${b.v.toLocaleString()} · ${pct(b.v,tot)}%</td><td>${b.a}</td><td class="muted">${b.w}</td></tr>`;}return h+`</tbody></table></div>`;}
+function lRecycleHTML(data){const RS=["Unresponsive","Bad Contact Info","Buying Window Closed","Disqualified"];const parts=RS.map(s=>({s,v:data.filter(x=>x.s===s).length}));const total=parts.reduce((a,p)=>a+p.v,0);return `<div><div class="big">${total.toLocaleString()}</div><div class="it">Total recycling target</div></div>`+parts.map(p=>`<div class="it"><b>${p.v.toLocaleString()}</b> &nbsp;${p.s}</div>`).join("");}
+function dPlanHTML(data){const tot=data.length||1;const ALL=[].concat(META.dopen,META.dwon,META.dlost);const rd=ALL.filter(s=>data.some(x=>x.s===s)).map(s=>{const ds=data.filter(x=>x.s===s);const amt=ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return {s,v:ds.length,amt};}).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Deals</th><th style="text-align:right">Total Amount</th><th style="text-align:right">Avg</th></tr></thead><tbody>`;for(const r of rd){h+=`<tr><td><b>${r.s}</b></td><td class="vol">${r.v.toLocaleString()} · ${pct(r.v,tot)}%</td><td class="vol">${r.amt?'$'+Math.round(r.amt).toLocaleString():'—'}</td><td class="vol">${r.v&&r.amt?'$'+Math.round(r.amt/r.v).toLocaleString():'—'}</td></tr>`;}return h+`</tbody></table></div>`;}
+function dValueHTML(data){const g=(grp)=>{const ds=data.filter(x=>x.g===grp);return {n:ds.length,amt:ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0)};};const won=g("Won"),lost=g("Lost"),op=g("Open / In Progress");const tot=data.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return `<div><div class="big">$${Math.round(tot).toLocaleString()}</div><div class="it">Total deal value (${data.length} deals)</div></div><div class="it"><b>$${Math.round(won.amt).toLocaleString()}</b> &nbsp;Won (${won.n})</div><div class="it"><b>$${Math.round(op.amt).toLocaleString()}</b> &nbsp;Open (${op.n})</div><div class="it"><b>$${Math.round(lost.amt).toLocaleString()}</b> &nbsp;Lost (${lost.n})</div>`;}
+// ===== LEADS =====
+const LGROUPS=["Active Pipeline","Cold Pool","Off-board"];const LSTAGES={"Active Pipeline":META.active,"Cold Pool":META.cold,"Off-board":META.offboard};
+const LGCOL={"Active Pipeline":"#4f8cff","Cold Pool":"#a78bfa","Off-board":"#64748b"};
+const LGDESC={"Active Pipeline":"In motion: "+META.active.join(" · "),"Cold Pool":"Dormant but addressable: "+META.cold.join(" · "),"Off-board":"Routed out or closed: "+META.offboard.join(" · ")};
+const LAYERS=[["All","All Leads"],["Sales","Sales Owned"],["AI","AI Owned"],["Pending","Pending Assignation"]];
+let lLayer="All", lSel=new Set();
+function lOwnersOf(L){return [...new Set((L==="All"?LEADS:LEADS.filter(x=>x.L===L)).map(x=>x.o))];}
+function lFlt(){return LEADS.filter(x=>lSel.has(x.o));}
+function lSetLayer(L){lLayer=L;lSel=new Set(lOwnersOf(L));lRender();}
+function lToggle(o){lSel.has(o)?lSel.delete(o):lSel.add(o);lRender();}
+function lDrill(stage,rating){const d=lFlt().filter(x=>x.s===stage&&x.r===rating);
+  document.getElementById("modalTitle").innerHTML=`${stage} · <span style="color:${TIERCOL[(META.ratings.find(c=>c.r===rating)||{tier:'Unknown'}).tier]}">${rating}</span> <span class="muted" style="font-weight:400">— ${d.length} leads</span>`;
+  let h=d.length?`<table class="dt"><thead><tr><th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
+  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>—</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
+function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
+  ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
+  const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
+  document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
+  document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
+  document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,"lDrill");
+  document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
+  document.getElementById("notes").innerHTML=`<b>Leads — data notes.</b> Source: Soho CRM export (Standard layout, created ≥ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. Click any cell to open its leads (links to Zoho).`;}
+
+// ===== DEALS =====
+const DGROUPS=["Open / In Progress","Won","Lost"];const DSTAGES={"Open / In Progress":META.dopen,"Won":META.dwon,"Lost":META.dlost};
+const DGCOL={"Open / In Progress":"#4f8cff","Won":"#22c55e","Lost":"#ef4444"};
+const DGDESC={"Open / In Progress":"Active: "+META.dopen.join(" · "),"Won":"Closed won","Lost":"Closed lost: "+META.dlost.join(" · ")};
+let dSel=new Set();
+function dFlt(){return DEALS.filter(x=>dSel.has(x.o));}
+function dToggle(o){dSel.has(o)?dSel.delete(o):dSel.add(o);dRender();}
+function money(v){const n=parseFloat(v);return isNaN(n)?'':'$'+n.toLocaleString();}
+function dDrill(stage,rating){const d=dFlt().filter(x=>x.s===stage&&x.r===rating);
+  document.getElementById("modalTitle").innerHTML=`${stage} · <span style="color:${TIERCOL[(META.dratings.find(c=>c.r===rating)||{tier:'None'}).tier]}">${rating}</span> <span class="muted" style="font-weight:400">— ${d.length} deals</span>`;
+  let h=d.length?`<table class="dt"><thead><tr><th>Deal</th><th>Type</th><th>Prior Yr BP</th><th>BP Est.</th><th>Amount</th><th>Deal Created</th><th>Stage</th><th>Closing Month</th><th># Notes</th><th>Last Activity</th><th>Funnel Time</th><th>Pipeline (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No deals.</div>`;
+  if(d.length){d.sort((a,b)=>(parseFloat(b.am)||0)-(parseFloat(a.am)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Deals/${x.id}" target="_blank">${x.n}</a></td><td>${x.ty||'<span class=muted>—</span>'}</td><td>${x.pyb||''}</td><td>${x.bpe||''}</td><td>${money(x.am)}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.cm||''}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${x.ft!==''?x.ft:''}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
+function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
+  document.getElementById("dpipe").innerHTML=pipeHTML(d,DGROUPS,DGCOL,DGDESC);
+  document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
+  document.getElementById("dinsight").innerHTML=insightHTML(d,DGROUPS,DSTAGES,META.dratings);
+  document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,"dDrill");
+  document.getElementById("dplan").innerHTML=dPlanHTML(d);document.getElementById("dvalue").innerHTML=dValueHTML(d);
+  document.getElementById("dnotes").innerHTML=`<b>Deals — data notes.</b> Source: Soho CRM deals export (2026-06-16 · 304 rated, 355 not set). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
+
+async function load(){const sub=document.getElementById("sub");try{sub.textContent="⏳ Loading live data from Zoho…";const[lr,dr]=await Promise.all([fetch(LEADS_URL).then(r=>r.json()),fetch(DEALS_URL).then(r=>r.json())]);LEADS=lr.leads||[];DEALS=dr.deals||[];lSel=new Set(lOwnersOf("All"));dSel=new Set(DEALS.map(x=>x.o));sub.textContent=LEADS.length.toLocaleString()+" leads · "+DEALS.length.toLocaleString()+" deals · LIVE from Zoho · updated "+new Date().toLocaleString();lRender();dRender();}catch(e){sub.textContent="⚠️ Error loading live data: "+e;}}load();setInterval(load,300000);
+</script></body></html>
