@@ -34,6 +34,7 @@ th{background:#10141f;color:var(--mut);font-size:11px}
 td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#141826;z-index:1;white-space:nowrap}
 .rcol{font-size:11px;white-space:nowrap;font-weight:700}
 .rcol small{display:block;font-size:9px;font-weight:400;color:#6b779b;margin-top:2px}
+.tierhdr{cursor:pointer;user-select:none}.tierhdr:hover{background:#1a2235;color:#fff!important}
 .cell{cursor:pointer}.cell:hover{outline:2px solid var(--accent);outline-offset:-2px}.cell.z{color:#39415e;cursor:default}
 .pp{font-size:11px;font-weight:700}.cc{font-size:10px;color:var(--mut);font-weight:600}
 .gtot td{background:#11162a;font-weight:700;border-top:1px solid rgba(79,140,255,.4)}.gtot td .pp{color:#bcd0ff}
@@ -85,18 +86,25 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function showSection(s){document.getElementById("leadsView").style.display=s==="leads"?"block":"none";document.getElementById("dealsView").style.display=s==="deals"?"block":"none";document.getElementById("secLeads").classList.toggle("active",s==="leads");document.getElementById("secDeals").classList.toggle("active",s==="deals");}
 function ownerChips(data,sel,fn,el){const c={};for(const x of data)c[x.o]=(c[x.o]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);
   document.getElementById(el).innerHTML='<span class="lbl">Owners (click to toggle):</span>'+arr.map(([o,n])=>`<span class="ochip ${sel.has(o)?'on':'off'}" onclick="${fn}('${o.replace(/'/g,"\\'")}')"><span class="cdot"></span><b>${o}</b><span class="oc">${n.toLocaleString()}</span></span>`).join("");}
-function heatHTML(data,GROUPS,STAGES,RATINGS,drillFn){const tot=data.length||1;
+function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn){const tot=data.length||1;
   const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}
   for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}
-  let max=1;for(const s in m)for(const c of RATINGS)max=Math.max(max,m[s][c.r]);
-  const tg=[];let cur=null;for(const c of RATINGS){if(!cur||cur.tier!==c.tier){cur={tier:c.tier,n:0};tg.push(cur);}cur.n++;}
+  const byTier={};for(const c of RATINGS){(byTier[c.tier]=byTier[c.tier]||[]).push(c);}
+  const tmeta=[],cols=[];
+  for(const t of TIERS){const rs=byTier[t];if(!rs||!rs.length)continue;const ex=expanded.has(t)||rs.length<=1;
+    if(ex){for(const c of rs)cols.push({type:'r',c,tier:t});}else{cols.push({type:'t',tier:t,ratings:rs});}
+    tmeta.push({tier:t,span:ex?rs.length:1,ex,ratings:rs});}
+  const cv=(col,mr)=>col.type==='r'?(mr[col.c.r]||0):col.ratings.reduce((a,c)=>a+(mr[c.r]||0),0);
+  const dv=(col,arr)=>col.type==='r'?arr.filter(x=>x.r===col.c.r).length:arr.filter(x=>x.t===col.tier).length;
+  let max=1;for(const g of GROUPS)for(const s of STAGES[g])for(const col of cols)max=Math.max(max,cv(col,m[s]));
   const f=(v)=>`<div class="pp">${(v/tot*100).toFixed(2)}%</div><div class="cc">${v.toLocaleString()}</div>`;
-  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tg.map(g=>`<th colspan="${g.n}" style="color:${TIERCOL[g.tier]}">${g.tier==='None'?'No Rating':g.tier+' Tier'}</th>`).join("")+`<th rowspan="2">Row Total</th></tr>`;
-  h+=`<tr>`+RATINGS.map(c=>`<th class="rcol"><span class=dot style="background:${TIERCOL[c.tier]}"></span>${c.short}${c.bp?`<small>${c.bp}</small>`:''}</th>`).join("")+`</tr></thead><tbody>`;
+  const tlabel=(t)=>t==='None'?'No Rating':t==='Unknown'?'Unknown':t+' Tier';
+  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' ▾':' ▸'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
+  h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings ▸</small></th>`).join("")+`</tr></thead><tbody>`;
   for(const g of GROUPS){for(const s of STAGES[g]){const rc=RATINGS.reduce((a,c)=>a+m[s][c.r],0);
-    h+=`<tr><td>${s}</td>`+RATINGS.map(c=>{const v=m[s][c.r];if(!v)return `<td class="cell z">·</td>`;const al=(0.12+0.78*(v/max)).toFixed(2);return `<td class="cell" style="background:rgba(79,140,255,${al})" onclick="${drillFn}('${s.replace(/'/g,"")}','${c.r.replace(/'/g,"")}')">${f(v)}</td>`;}).join("")+`<td class="tot">${f(rc)}</td></tr>`;}
-    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td>${g} · Group Total</td>`+RATINGS.map(c=>{const v=gd.filter(x=>x.r===c.r).length;return `<td>${v?f(v):'·'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
-  h+=`<tr class="tot"><td>Column Total</td>`+RATINGS.map(c=>{const v=data.filter(x=>x.r===c.r).length;return `<td>${f(v)}</td>`;}).join("")+`<td>${f(data.length)}</td></tr>`;
+    h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">·</td>`;const al=(0.12+0.78*(v/max)).toFixed(2);const arg=col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;return `<td class="cell" style="background:rgba(79,140,255,${al})" onclick="${drillFn}(${arg})">${f(v)}</td>`;}).join("")+`<td class="tot">${f(rc)}</td></tr>`;}
+    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td>${g} · Group Total</td>`+cols.map(col=>{const v=dv(col,gd);return `<td>${v?f(v):'·'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
+  h+=`<tr class="tot"><td>Column Total</td>`+cols.map(col=>{const v=dv(col,data);return `<td>${f(v)}</td>`;}).join("")+`<td>${f(data.length)}</td></tr>`;
   return h+`</tbody></table></div>`;}
 function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} × ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`👁️ <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
 function pipeHTML(data,GROUPS,COL,DESC){const tot=data.length||1;return GROUPS.map(g=>{const v=data.filter(x=>x.g===g).length;return `<div class="pc" style="border-top-color:${COL[g]}"><div><span class="v">${v.toLocaleString()}</span><span class="pct" style="color:${COL[g]}">${pct(v,tot)}%</span></div><div class="nm">${g}</div><div class="ds">${DESC[g]}</div></div>`;}).join("");}
@@ -123,43 +131,45 @@ const LGROUPS=["Productive Stages","Recycle Stages","Disposal Stages"];const LST
 const LGCOL={"Productive Stages":"#4f8cff","Recycle Stages":"#a78bfa","Disposal Stages":"#64748b"};
 const LGDESC={"Productive Stages":"Active in the funnel: "+META.productive.join(" · "),"Recycle Stages":"To re-engage: "+META.recycle.join(" · "),"Disposal Stages":"Routed out / closed: "+META.disposal.join(" · ")};
 const LAYERS=[["All","All Leads"],["Sales","Sales Owned"],["AI","AI Owned"],["Pending","Pending Assignation"]];
-let lLayer="All", lSel=new Set();
+let lLayer="All", lSel=new Set(), lExpanded=new Set();
 function lOwnersOf(L){return [...new Set((L==="All"?LEADS:LEADS.filter(x=>x.L===L)).map(x=>x.o))];}
 function lFlt(){return LEADS.filter(x=>lSel.has(x.o));}
 function lSetLayer(L){lLayer=L;lSel=new Set(lOwnersOf(L));lRender();}
 function lToggle(o){lSel.has(o)?lSel.delete(o):lSel.add(o);lRender();}
-function lDrill(stage,rating){const d=lFlt().filter(x=>x.s===stage&&x.r===rating);
-  document.getElementById("modalTitle").innerHTML=`${stage} · <span style="color:${TIERCOL[(META.ratings.find(c=>c.r===rating)||{tier:'Unknown'}).tier]}">${rating}</span> <span class="muted" style="font-weight:400">— ${d.length} leads</span>`;
-  let h=d.length?`<table class="dt"><thead><tr><th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
-  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>—</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+function lToggleTier(t){lExpanded.has(t)?lExpanded.delete(t):lExpanded.add(t);lRender();}
+function openLeadModal(title,d){document.getElementById("modalTitle").innerHTML=title;
+  let h=d.length?`<table class="dt"><thead><tr><th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th>Rating</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
+  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>—</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
+function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key+' Tier'):key;openLeadModal(`${stage} · <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
 function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
   ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
   const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
   document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
-  document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,"lDrill");
+  document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,META.tiers,"lDrill",lExpanded,"lToggleTier");
   document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
-  document.getElementById("notes").innerHTML=`<b>Leads — data notes.</b> Source: Soho CRM export (Standard layout, created ≥ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. Click any cell to open its leads (links to Zoho).`;}
+  document.getElementById("notes").innerHTML=`<b>Leads — data notes.</b> Source: Soho CRM export (Standard layout, created ≥ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> — click a tier header (▸) to expand it into its individual ratings. Click any cell to open its leads (links to Zoho).`;}
 
 // ===== DEALS =====
 const DGROUPS=["Open / In Progress","Won","Lost"];const DSTAGES={"Open / In Progress":META.dopen,"Won":META.dwon,"Lost":META.dlost};
 const DGCOL={"Open / In Progress":"#4f8cff","Won":"#22c55e","Lost":"#ef4444"};
 const DGDESC={"Open / In Progress":"Active: "+META.dopen.join(" · "),"Won":"Closed won","Lost":"Closed lost: "+META.dlost.join(" · ")};
-let dSel=new Set();
+let dSel=new Set(), dExpanded=new Set();
 function dFlt(){return DEALS.filter(x=>dSel.has(x.o));}
 function dToggle(o){dSel.has(o)?dSel.delete(o):dSel.add(o);dRender();}
+function dToggleTier(t){dExpanded.has(t)?dExpanded.delete(t):dExpanded.add(t);dRender();}
 function money(v){const n=parseFloat(v);return isNaN(n)?'':'$'+n.toLocaleString();}
-function dDrill(stage,rating){const d=dFlt().filter(x=>x.s===stage&&x.r===rating);
-  document.getElementById("modalTitle").innerHTML=`${stage} · <span style="color:${TIERCOL[(META.dratings.find(c=>c.r===rating)||{tier:'None'}).tier]}">${rating}</span> <span class="muted" style="font-weight:400">— ${d.length} deals</span>`;
-  let h=d.length?`<table class="dt"><thead><tr><th>Deal</th><th>Type</th><th>Prior Yr BP</th><th>BP Est.</th><th>Amount</th><th>Deal Created</th><th>Stage</th><th>Closing Month</th><th># Notes</th><th>Last Activity</th><th>Funnel Time</th><th>Pipeline (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No deals.</div>`;
-  if(d.length){d.sort((a,b)=>(parseFloat(b.am)||0)-(parseFloat(a.am)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Deals/${x.id}" target="_blank">${x.n}</a></td><td>${x.ty||'<span class=muted>—</span>'}</td><td>${x.pyb||''}</td><td>${x.bpe||''}</td><td>${money(x.am)}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.cm||''}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${x.ft!==''?x.ft:''}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+function openDealModal(title,d){document.getElementById("modalTitle").innerHTML=title;
+  let h=d.length?`<table class="dt"><thead><tr><th>Deal</th><th>Type</th><th>Prior Yr BP</th><th>BP Est.</th><th>Amount</th><th>Deal Created</th><th>Stage</th><th>Rating</th><th>Closing Month</th><th># Notes</th><th>Last Activity</th><th>Funnel Time</th><th>Pipeline (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No deals.</div>`;
+  if(d.length){d.sort((a,b)=>(parseFloat(b.am)||0)-(parseFloat(a.am)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Deals/${x.id}" target="_blank">${x.n}</a></td><td>${x.ty||'<span class=muted>—</span>'}</td><td>${x.pyb||''}</td><td>${x.bpe||''}</td><td>${money(x.am)}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.cm||''}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${x.ft!==''?x.ft:''}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
+function dDrill(stage,key,isTier){const d=dFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.dratings.find(c=>c.r===key)||{tier:'None'}).tier];const label=isTier?(key==='None'?'No Rating':key+' Tier'):key;openDealModal(`${stage} · <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">— ${d.length} deals</span>`,d);}
 function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
   document.getElementById("dpipe").innerHTML=pipeHTML(d,DGROUPS,DGCOL,DGDESC);
   document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
   document.getElementById("dinsight").innerHTML=insightHTML(d,DGROUPS,DSTAGES,META.dratings);
-  document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,"dDrill");
+  document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,META.dtiers,"dDrill",dExpanded,"dToggleTier");
   document.getElementById("dplan").innerHTML=dPlanHTML(d);document.getElementById("dvalue").innerHTML=dValueHTML(d);
   document.getElementById("dnotes").innerHTML=`<b>Deals — data notes.</b> Source: Soho CRM deals export (${META.snapshot}; 304 rated, 355 not set). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
 
