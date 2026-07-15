@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PTS ÔÇö Lead Funnel & Deal Pipeline Report</title>
+<title>PTS &#8212; Lead Funnel & Deal Pipeline Report</title>
 <style>
 :root{--bg:#0e1018;--panel:#151926;--card:#1a1f30;--line:#2a3147;--txt:#e8ebf5;--mut:#94a0c0;--accent:#4f8cff;}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -84,18 +84,18 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 .cr-stbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
 
 </style></head><body><div class="wrap">
-<div class="brand"><h1>PTS ÔÇö Lead Funnel &amp; Deal Pipeline Report</h1><span class="tag">LIVE</span></div>
+<div class="brand"><h1>PTS &#8212; Lead Funnel &amp; Deal Pipeline Report</h1><span class="tag">LIVE</span></div>
 <div class="sub" id="sub"></div>
 <div class="sections">
-  <div class="sec active" id="secLeads" onclick="showSection('leads')">­ƒôè Leads</div>
-  <div class="sec" id="secDeals" onclick="showSection('deals')">­ƒôü Deals</div>
-  <div class="sec" id="secCalls" onclick="showSection('calls')">­ƒô× Call Results</div>
+  <div class="sec active" id="secLeads" onclick="showSection('leads')">&#128202; Leads</div>
+  <div class="sec" id="secDeals" onclick="showSection('deals')">&#128193; Deals</div>
+  <div class="sec" id="secCalls" onclick="showSection('calls')">&#128222; Call Results</div>
 </div>
 <div id="leadsView">
   <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div>
   <h2 class="sh">Lead Funnel</h2><div class="cards" id="pipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="cards"></div>
-  <h2 class="sh">Stage ├ù Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
+  <h2 class="sh">Stage &#215; Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
   <h2 class="sh">Treatment Plan</h2><div id="plan"></div><div class="recycle" id="recycle"></div>
   <div class="notes" id="notes"></div>
 </div>
@@ -103,33 +103,33 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
   <div class="ochips" id="downers"></div>
   <h2 class="sh">Deal Pipeline</h2><div class="cards" id="dpipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="dcards"></div>
-  <h2 class="sh">Stage ├ù Rating Heatmap</h2><div class="insight" id="dinsight"></div><div id="dheat"></div>
+  <h2 class="sh">Stage &#215; Rating Heatmap</h2><div class="insight" id="dinsight"></div><div id="dheat"></div>
   <h2 class="sh">Deal Value by Stage</h2><div id="dplan"></div><div class="recycle" id="dvalue"></div>
   <div class="notes" id="dnotes"></div>
 </div>
 
 <div id="callsView" style="display:none">
   <div class="sub" id="crSub"></div>
-  <h2 class="sh">Resumen</h2>
+  <h2 class="sh">Summary</h2>
   <div class="cards" id="crKpis"></div>
-  <h2 class="sh">Embudo por follow-up (cn1 &rarr; cn10)</h2>
+  <h2 class="sh">Funnel by follow-up (cn1 &rarr; cn10)</h2>
   <div class="cr-legend" id="crLegend"></div>
   <div class="cr-fn" id="crFunnel"></div>
-  <h2 class="sh">Recorrido de cada lead</h2>
+  <h2 class="sh">Per-lead journey</h2>
   <div class="cr-ctrl">
-    <input class="cr-search" id="crQ" placeholder="Buscar por nombre o telefono..." oninput="crPage=1;crRender()">
-    <span class="cr-fchip on" data-f="all" onclick="crSetF(this)">Todos</span>
-    <span class="cr-fchip" data-f="estancado" onclick="crSetF(this)">&#128308; Estancados</span>
-    <span class="cr-fchip" data-f="encurso" onclick="crSetF(this)">&#128994; En curso</span>
-    <span class="cr-fchip" data-f="terminal" onclick="crSetF(this)">&#9989; Cerrados</span>
-    <span class="cr-fchip" data-f="cn10" onclick="crSetF(this)">&#127937; Completos</span>
+    <input class="cr-search" id="crQ" placeholder="Search by name or phone..." oninput="crPage=1;crRender()">
+    <span class="cr-fchip on" data-f="all" onclick="crSetF(this)">All</span>
+    <span class="cr-fchip" data-f="estancado" onclick="crSetF(this)">&#128308; Stranded</span>
+    <span class="cr-fchip" data-f="encurso" onclick="crSetF(this)">&#128994; In progress</span>
+    <span class="cr-fchip" data-f="terminal" onclick="crSetF(this)">&#9989; Closed</span>
+    <span class="cr-fchip" data-f="cn10" onclick="crSetF(this)">&#127937; Completed</span>
   </div>
   <div class="cr-ctrl" style="margin-top:-4px"><span class="cr-count" id="crCount"></span><div class="cr-pgbar" id="crPgbar"></div></div>
   <div class="hscroll"><table id="crJourney"><thead><tr id="crHead"></tr></thead><tbody id="crBody"></tbody></table></div>
   <div class="notes" id="crNotes"></div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">Ô£ò</span></div><div class="modalbody" id="modalBody"></div></div></div>
+<div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">&#10005;</span></div><div class="modalbody" id="modalBody"></div></div></div>
 </div>
 <script>
 let LEADS=[],DEALS=[];const LEADS_URL="https://n8n.pts-automation.cloud/webhook/report-leads-live",DEALS_URL="https://n8n.pts-automation.cloud/webhook/report-deals-live";
@@ -156,43 +156,43 @@ function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn,GCO
   let max=1;for(const g of GROUPS)for(const s of STAGES[g])for(const col of cols)max=Math.max(max,cv(col,m[s]));
   const f=(v)=>`<div class="pp">${(v/tot*100).toFixed(2)}%</div><div class="cc">${v.toLocaleString()}</div>`;
   const tlabel=(t)=>t==='None'?'No Rating':t==='Unknown'?'Unknown':t+' Tier';
-  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' Ôû¥':' Ôû©'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
-  h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings Ôû©</small></th>`).join("")+`</tr></thead><tbody>`;
+  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' \u25be':' \u25b8'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
+  h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings \u25b8</small></th>`).join("")+`</tr></thead><tbody>`;
   for(const g of GROUPS){for(const s of STAGES[g]){const rc=RATINGS.reduce((a,c)=>a+m[s][c.r],0);
-    h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">┬À</td>`;const t=0.15+0.85*Math.sqrt(v/max);const txt=t>0.8?'#0e1018':'#eaf0ff';const arg=col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;return `<td class="cell" style="background:${heatColor(t)};color:${txt}" onclick="${drillFn}(${arg})">${f(v)}</td>`;}).join("")+`<td class="rowtot">${f(rc)}</td></tr>`;}
-    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td style="color:${(GCOL&&GCOL[g])||'#dce6ff'};border-left:3px solid ${(GCOL&&GCOL[g])||'#4f8cff'}">${g} ┬À Group Total</td>`+cols.map(col=>{const v=dv(col,gd);return `<td>${v?f(v):'┬À'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
+    h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">\u00b7</td>`;const t=0.15+0.85*Math.sqrt(v/max);const txt=t>0.8?'#0e1018':'#eaf0ff';const arg=col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;return `<td class="cell" style="background:${heatColor(t)};color:${txt}" onclick="${drillFn}(${arg})">${f(v)}</td>`;}).join("")+`<td class="rowtot">${f(rc)}</td></tr>`;}
+    const gd=data.filter(x=>x.g===g);h+=`<tr class="gtot"><td style="color:${(GCOL&&GCOL[g])||'#dce6ff'};border-left:3px solid ${(GCOL&&GCOL[g])||'#4f8cff'}">${g} \u00b7 Group Total</td>`+cols.map(col=>{const v=dv(col,gd);return `<td>${v?f(v):'\u00b7'}</td>`;}).join("")+`<td>${f(gd.length)}</td></tr>`;}
   h+=`<tr class="tot"><td>Column Total</td>`+cols.map(col=>{const v=dv(col,data);return `<td>${f(v)}</td>`;}).join("")+`<td>${f(data.length)}</td></tr>`;
   return h+`</tbody></table></div>`;}
-function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} ├ù ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`­ƒæü´©Å <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
+function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} \u00d7 ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`\ud83d\udc41\ufe0f <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
 function pipeHTML(data,GROUPS,COL,DESC){const tot=data.length||1;return GROUPS.map(g=>{const v=data.filter(x=>x.g===g).length;return `<div class="pc" style="border-top-color:${COL[g]}"><div><span class="v">${v.toLocaleString()}</span><span class="pct" style="color:${COL[g]}">${pct(v,tot)}%</span></div><div class="nm">${g}</div><div class="ds">${DESC[g]}</div></div>`;}).join("");}
 function tierCardsHTML(data,TIERS,TLIST){const tot=data.length||1;const TL={Top:'Top Tier',Mid:'Mid Tier',Bottom:'Bottom Tier',Unknown:'Unknown',None:'No Rating'};return TIERS.map(t=>{const v=data.filter(x=>x.t===t).length;const li=(TLIST[t]||[]).map(r=>`<li>${r}</li>`).join("");return `<div class="kc" style="border-top-color:${TIERCOL[t]}"><div class="tlabel" style="color:${TIERCOL[t]}">${TL[t]||t}</div><div class="kcrow"><div><div class="v" style="color:${TIERCOL[t]}">${v.toLocaleString()}</div><div class="l">${pct(v,tot)}% of view</div></div><ul class="rl">${li}</ul></div></div>`;}).join("");}
 
 const TREATMENT=[
- {name:"Inbound MQL",stages:["Inbound MQL"],g:"Productive",action:"Standard Connie flow.",why:"Top of funnel ÔÇö fresh inbound"},
+ {name:"Inbound MQL",stages:["Inbound MQL"],g:"Productive",action:"Standard Connie flow.",why:"Top of funnel \u2014 fresh inbound"},
  {name:"Routing",stages:["Routing"],g:"Productive",action:"Auto-assign owner; Connie engages.",why:"Awaiting routing"},
  {name:"Reaching",stages:["Reaching"],g:"Productive",action:"Active outreach (human + Connie).",why:"In contact attempt"},
- {name:"Opened",stages:["Opened"],g:"Productive",action:"Continue outreach; nudge.",why:"Engaged ÔÇö opened"},
- {name:"Replied",stages:["Replied"],g:"Productive",action:"Human-led conversation.",why:"Hot ÔÇö replied"},
+ {name:"Opened",stages:["Opened"],g:"Productive",action:"Continue outreach; nudge.",why:"Engaged \u2014 opened"},
+ {name:"Replied",stages:["Replied"],g:"Productive",action:"Human-led conversation.",why:"Hot \u2014 replied"},
  {name:"Booked",stages:["Booked"],g:"Productive",action:"Confirm + prep appointment.",why:"Meeting booked"},
- {name:"Open to Buy SQL",stages:["Open to Buy SQL"],g:"Productive",action:"Sales priority ÔÇö push to deal.",why:"Sales-qualified"},
- {name:"Buying Window Closed",stages:["Buying Window Closed"],g:"Productive",action:"Re-open + Connie if active.",why:"Backdoor ÔÇö last active stage"},
+ {name:"Open to Buy SQL",stages:["Open to Buy SQL"],g:"Productive",action:"Sales priority \u2014 push to deal.",why:"Sales-qualified"},
+ {name:"Buying Window Closed",stages:["Buying Window Closed"],g:"Productive",action:"Re-open + Connie if active.",why:"Backdoor \u2014 last active stage"},
  {name:"Nurture",stages:["Nurture"],g:"Recycle",action:"Maintain existing cadence.",why:"Long-term nurture"},
  {name:"Unresponsive",stages:["Unresponsive"],g:"Recycle",action:"Connie calling pass.",why:"Low-cost re-engagement"},
  {name:"Bad Contact Info",stages:["Bad Contact Info"],g:"Recycle",action:"Enrich first, then call if valid.",why:"Avoids wasted credits"},
- {name:"The Ladder",stages:["The Ladder"],g:"Disposal",action:"No action ÔÇö routed to partners.",why:"Out of scope"},
+ {name:"The Ladder",stages:["The Ladder"],g:"Disposal",action:"No action \u2014 routed to partners.",why:"Out of scope"},
  {name:"Disqualified",stages:["Disqualified"],g:"Disposal",action:"Last spray &amp; pray pass with Connie; log + close.",why:"Visibility &amp; documentation"},
- {name:"Junk Lead",stages:["Junk Lead"],g:"Disposal",action:"Skip ÔÇö no action (future: bot re-check notes).",why:"Already discarded purposefully"},
+ {name:"Junk Lead",stages:["Junk Lead"],g:"Disposal",action:"Skip \u2014 no action (future: bot re-check notes).",why:"Already discarded purposefully"},
 ];
-function lPlanHTML(data){const tot=data.length||1;const GC={Productive:"#4f8cff",Recycle:"#a78bfa",Disposal:"#64748b"};const GL={Productive:"Productive Stages",Recycle:"Recycle Stages",Disposal:"Disposal Stages"};let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;let cg=null;for(const b of TREATMENT){if(b.g!==cg){cg=b.g;h+=`<tr class="grouprow"><td colspan="4" style="color:${GC[cg]}">${GL[cg]}</td></tr>`;}const v=data.filter(x=>b.stages.indexOf(x.s)>=0).length;h+=`<tr><td><b>${b.name}</b></td><td class="vol">${v.toLocaleString()} ┬À ${pct(v,tot)}%</td><td>${b.action}</td><td class="muted">${b.why}</td></tr>`;}return h+`</tbody></table></div>`;}
+function lPlanHTML(data){const tot=data.length||1;const GC={Productive:"#4f8cff",Recycle:"#a78bfa",Disposal:"#64748b"};const GL={Productive:"Productive Stages",Recycle:"Recycle Stages",Disposal:"Disposal Stages"};let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Volume</th><th>Action</th><th>Rationale</th></tr></thead><tbody>`;let cg=null;for(const b of TREATMENT){if(b.g!==cg){cg=b.g;h+=`<tr class="grouprow"><td colspan="4" style="color:${GC[cg]}">${GL[cg]}</td></tr>`;}const v=data.filter(x=>b.stages.indexOf(x.s)>=0).length;h+=`<tr><td><b>${b.name}</b></td><td class="vol">${v.toLocaleString()} \u00b7 ${pct(v,tot)}%</td><td>${b.action}</td><td class="muted">${b.why}</td></tr>`;}return h+`</tbody></table></div>`;}
 function lRecycleHTML(data){const RS=["Nurture","Unresponsive","Bad Contact Info","Disqualified"];const parts=RS.map(s=>({s,v:data.filter(x=>x.s===s).length}));const total=parts.reduce((a,p)=>a+p.v,0);return `<div><div class="big">${total.toLocaleString()}</div><div class="it">Total recycling target</div></div>`+parts.map(p=>`<div class="it"><b>${p.v.toLocaleString()}</b> &nbsp;${p.s}</div>`).join("");}
-function dPlanHTML(data){const tot=data.length||1;const ALL=[].concat(META.dopen,META.dwon,META.dlost);const rd=ALL.filter(s=>data.some(x=>x.s===s)).map(s=>{const ds=data.filter(x=>x.s===s);const amt=ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return {s,v:ds.length,amt};}).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Deals</th><th style="text-align:right">Total Amount</th><th style="text-align:right">Avg</th></tr></thead><tbody>`;for(const r of rd){h+=`<tr><td><b>${r.s}</b></td><td class="vol">${r.v.toLocaleString()} ┬À ${pct(r.v,tot)}%</td><td class="vol">${r.amt?'$'+Math.round(r.amt).toLocaleString():'ÔÇö'}</td><td class="vol">${r.v&&r.amt?'$'+Math.round(r.amt/r.v).toLocaleString():'ÔÇö'}</td></tr>`;}return h+`</tbody></table></div>`;}
+function dPlanHTML(data){const tot=data.length||1;const ALL=[].concat(META.dopen,META.dwon,META.dlost);const rd=ALL.filter(s=>data.some(x=>x.s===s)).map(s=>{const ds=data.filter(x=>x.s===s);const amt=ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return {s,v:ds.length,amt};}).sort((a,b)=>b.v-a.v);let h=`<div class="hscroll"><table class="plan"><thead><tr><th>Stage</th><th style="text-align:right">Deals</th><th style="text-align:right">Total Amount</th><th style="text-align:right">Avg</th></tr></thead><tbody>`;for(const r of rd){h+=`<tr><td><b>${r.s}</b></td><td class="vol">${r.v.toLocaleString()} \u00b7 ${pct(r.v,tot)}%</td><td class="vol">${r.amt?'$'+Math.round(r.amt).toLocaleString():'\u2014'}</td><td class="vol">${r.v&&r.amt?'$'+Math.round(r.amt/r.v).toLocaleString():'\u2014'}</td></tr>`;}return h+`</tbody></table></div>`;}
 function dValueHTML(data){const g=(grp)=>{const ds=data.filter(x=>x.g===grp);return {n:ds.length,amt:ds.reduce((a,x)=>a+(parseFloat(x.am)||0),0)};};const won=g("Won"),lost=g("Lost"),op=g("Open / In Progress");const tot=data.reduce((a,x)=>a+(parseFloat(x.am)||0),0);return `<div><div class="big">$${Math.round(tot).toLocaleString()}</div><div class="it">Total deal value (${data.length} deals)</div></div><div class="it"><b>$${Math.round(won.amt).toLocaleString()}</b> &nbsp;Won (${won.n})</div><div class="it"><b>$${Math.round(op.amt).toLocaleString()}</b> &nbsp;Open (${op.n})</div><div class="it"><b>$${Math.round(lost.amt).toLocaleString()}</b> &nbsp;Lost (${lost.n})</div>`;}
 
 // ===== LEADS =====
 const LGROUPS=["Productive Stages","Recycle Stages","Disposal Stages"];const LSTAGES={"Productive Stages":META.productive,"Recycle Stages":META.recycle,"Disposal Stages":META.disposal};
 const LGCOL={"Productive Stages":"#4f8cff","Recycle Stages":"#a78bfa","Disposal Stages":"#64748b"};
-const LGDESC={"Productive Stages":"Active in the funnel: "+META.productive.join(" ┬À "),"Recycle Stages":"To re-engage: "+META.recycle.join(" ┬À "),"Disposal Stages":"Routed out / closed: "+META.disposal.join(" ┬À ")};
-const LAYERS=[["All","All Leads"],["Sales","Sales Owned"],["AI","AI Owned"],["Pending","Pending Assignation"]];
+const LGDESC={"Productive Stages":"Active in the funnel: "+META.productive.join(" \u00b7 "),"Recycle Stages":"To re-engage: "+META.recycle.join(" \u00b7 "),"Disposal Stages":"Routed out / closed: "+META.disposal.join(" \u00b7 ")};
+const LAYERS=[["All","All Leads"],["Sales","Sales Owned"],["AI","AI Owned"],["Pending","Pending Assignment"]];
 let lLayer="All", lSel=new Set(), lExpanded=new Set();
 function lOwnersOf(L){return [...new Set((L==="All"?LEADS:LEADS.filter(x=>x.L===L)).map(x=>x.o))];}
 function lFlt(){return LEADS.filter(x=>lSel.has(x.o));}
@@ -201,9 +201,9 @@ function lToggle(o){lSel.has(o)?lSel.delete(o):lSel.add(o);lRender();}
 function lToggleTier(t){lExpanded.has(t)?lExpanded.delete(t):lExpanded.add(t);lRender();}
 function openLeadModal(title,d){document.getElementById("modalTitle").innerHTML=title;
   let h=d.length?`<table class="dt"><thead><tr><th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th>Rating</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
-  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>ÔÇö</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>\u2014</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
-function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key+' Tier'):key;openLeadModal(`${stage} ┬À <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">ÔÇö ${d.length} leads</span>`,d);}
+function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key+' Tier'):key;openLeadModal(`${stage} \u00b7 <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
   ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
   const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
@@ -211,12 +211,12 @@ function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl]
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
   document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,META.tiers,"lDrill",lExpanded,"lToggleTier",LGCOL);
   document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
-  document.getElementById("notes").innerHTML=`<b>Leads ÔÇö data notes.</b> Source: Soho CRM export (Standard layout, created ÔëÑ 2023). Snapshot ${META.snapshot}; <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> ÔÇö click a tier header (Ôû©) to expand it into its individual ratings. Click any cell to open its leads (links to Zoho).`;}
+  document.getElementById("notes").innerHTML=`<b>Leads \u2014 data notes.</b> Source: Zoho CRM (live). <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> \u2014 click a tier header (\u25b8) to expand it into its individual ratings. Click any cell to open its leads (links to Zoho).`;}
 
 // ===== DEALS =====
 const DGROUPS=["Open / In Progress","Won","Lost"];const DSTAGES={"Open / In Progress":META.dopen,"Won":META.dwon,"Lost":META.dlost};
 const DGCOL={"Open / In Progress":"#4f8cff","Won":"#22c55e","Lost":"#ef4444"};
-const DGDESC={"Open / In Progress":"Active: "+META.dopen.join(" ┬À "),"Won":"Closed won","Lost":"Closed lost: "+META.dlost.join(" ┬À ")};
+const DGDESC={"Open / In Progress":"Active: "+META.dopen.join(" \u00b7 "),"Won":"Closed won","Lost":"Closed lost: "+META.dlost.join(" \u00b7 ")};
 let dSel=new Set(), dExpanded=new Set();
 function dFlt(){return DEALS.filter(x=>dSel.has(x.o));}
 function dToggle(o){dSel.has(o)?dSel.delete(o):dSel.add(o);dRender();}
@@ -224,16 +224,16 @@ function dToggleTier(t){dExpanded.has(t)?dExpanded.delete(t):dExpanded.add(t);dR
 function money(v){const n=parseFloat(v);return isNaN(n)?'':'$'+n.toLocaleString();}
 function openDealModal(title,d){document.getElementById("modalTitle").innerHTML=title;
   let h=d.length?`<table class="dt"><thead><tr><th>Deal</th><th>Type</th><th>Prior Yr BP</th><th>BP Est.</th><th>Amount</th><th>Deal Created</th><th>Stage</th><th>Rating</th><th>Closing Month</th><th># Notes</th><th>Last Activity</th><th>Funnel Time</th><th>Pipeline (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No deals.</div>`;
-  if(d.length){d.sort((a,b)=>(parseFloat(b.am)||0)-(parseFloat(a.am)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Deals/${x.id}" target="_blank">${x.n}</a></td><td>${x.ty||'<span class=muted>ÔÇö</span>'}</td><td>${x.pyb||''}</td><td>${x.bpe||''}</td><td>${money(x.am)}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.cm||''}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${x.ft!==''?x.ft:''}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  if(d.length){d.sort((a,b)=>(parseFloat(b.am)||0)-(parseFloat(a.am)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Deals/${x.id}" target="_blank">${x.n}</a></td><td>${x.ty||'<span class=muted>\u2014</span>'}</td><td>${x.pyb||''}</td><td>${x.bpe||''}</td><td>${money(x.am)}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.r}</td><td>${x.cm||''}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${x.ft!==''?x.ft:''}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
-function dDrill(stage,key,isTier){const d=dFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.dratings.find(c=>c.r===key)||{tier:'None'}).tier];const label=isTier?(key==='None'?'No Rating':key+' Tier'):key;openDealModal(`${stage} ┬À <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">ÔÇö ${d.length} deals</span>`,d);}
+function dDrill(stage,key,isTier){const d=dFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.dratings.find(c=>c.r===key)||{tier:'None'}).tier];const label=isTier?(key==='None'?'No Rating':key+' Tier'):key;openDealModal(`${stage} \u00b7 <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} deals</span>`,d);}
 function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
   document.getElementById("dpipe").innerHTML=pipeHTML(d,DGROUPS,DGCOL,DGDESC);
   document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
   document.getElementById("dinsight").innerHTML=insightHTML(d,DGROUPS,DSTAGES,META.dratings);
   document.getElementById("dheat").innerHTML=heatHTML(d,DGROUPS,DSTAGES,META.dratings,META.dtiers,"dDrill",dExpanded,"dToggleTier",DGCOL);
   document.getElementById("dplan").innerHTML=dPlanHTML(d);document.getElementById("dvalue").innerHTML=dValueHTML(d);
-  document.getElementById("dnotes").innerHTML=`<b>Deals ÔÇö data notes.</b> Source: Soho CRM deals export (${META.snapshot}; 304 rated, 355 not set). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
+  document.getElementById("dnotes").innerHTML=`<b>Deals \u2014 data notes.</b> Source: Zoho CRM deals (live). "No Rating" = deal whose rating could not be derived. <b>Funnel Time</b> = days as a lead before converting; <b>Pipeline (days)</b> = days since the deal was created (recalculates live). Click any cell to open its deals (links to Zoho).`;}
 
 
 // ===== CALL RESULTS (Supabase live) =====
@@ -244,21 +244,21 @@ const CR_OSHORT={'Booked':'Booked','Transfered':'Transfer','Transferred':'Transf
 const CR_ORDER=['Booked','Transfered','Callback Requested','No Answer','Hung Up','FAILED TO CONNECT','Not Interested','Wrong Number','Disqualified','Unknown'];
 const CR_TERMINAL=new Set(['Booked','Transfered','Transferred','Not Interested','Wrong Number','Disqualified']);
 const CR_RETRY=new Set(['No Answer','Hung Up','Callback Requested','FAILED TO CONNECT']);
-const CR_STLAB={cn10:['\u{1F3C1}','#22c55e'],encurso:['\u{1F7E2}','#22c55e'],terminal:['Ô£à','#94a0c0'],estancado:['\u{1F534}','#ef4444']};
-const CR_STES={cn10:'completo',encurso:'en curso',terminal:'cerrado',estancado:'estancado'};
+const CR_STLAB={cn10:['\u{1F3C1}','#22c55e'],encurso:['\u{1F7E2}','#22c55e'],terminal:['\u2705','#94a0c0'],estancado:['\u{1F534}','#ef4444']};
+const CR_STES={cn10:'completed',encurso:'in progress',terminal:'closed',estancado:'stranded'};
 let CR_LOADED=false,CR_LEADS=[],CR_L={},CR_RES=[],crFilt='all',crPage=1;const CR_PS=100;
 function crPh10(p){return (''+(p==null?'':p)).replace(/\D/g,'').slice(-10);}
 function crEsc(s){return (''+(s==null?'':s)).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
 async function crSb(table,sel,order){let all=[],off=0;for(let i=0;i<30;i++){const u=SUPA_URL+"/rest/v1/"+table+"?select="+sel+"&quarter=eq.mar-jul&order="+order+"&limit=1000&offset="+off;const r=await fetch(u,{headers:{apikey:SUPA_ANON,Authorization:"Bearer "+SUPA_ANON}});if(!r.ok)throw new Error(table+" HTTP "+r.status+" "+(await r.text()).slice(0,120));const rows=await r.json();all=all.concat(rows);if(rows.length<1000)break;off+=1000;}return all;}
-async function loadCalls(force){if(CR_LOADED&&!force)return;CR_LOADED=true;const sub=document.getElementById("crSub");if(!force)sub.textContent="ÔÅ│ Cargando llamadas desde Supabase...";
+async function loadCalls(force){if(CR_LOADED&&!force)return;CR_LOADED=true;const sub=document.getElementById("crSub");if(!force)sub.textContent="\u23f3 Loading calls from Supabase...";
   try{
     const rq=await crSb("call_requests","lead_id,call_number,call_done,phone,lead_name,follow_up_personalized_date","id.asc");
     const rs=await crSb("call_results","lead_id,phone,call_number,call_outcome,outcome_reason,interest_level,follow_up_needed,ai_bot_notes,call_summary,call_duration_seconds,call_temporary_download_link,call_date_execution,call_transcript","call_date_execution.asc");
     const reqs=rq.map(r=>({l:r.lead_id,cn:r.call_number,d:r.call_done,p:r.phone,n:r.lead_name,fu:r.follow_up_personalized_date}));
     const res=rs.map(r=>({l:r.lead_id,p:r.phone,cn:r.call_number,oc:r.call_outcome,or:r.outcome_reason,il:r.interest_level,fn:r.follow_up_needed,an:r.ai_bot_notes,su:r.call_summary,du:r.call_duration_seconds,au:r.call_temporary_download_link,dt:r.call_date_execution,tx:r.call_transcript}));
     crBuild(reqs,res);
-    sub.innerHTML=CR_LEADS.length.toLocaleString()+" leads &middot; "+res.length.toLocaleString()+" llamadas &middot; <b>LIVE desde Supabase</b> &middot; "+new Date().toLocaleString();
-  }catch(e){CR_LOADED=false;sub.innerHTML="ÔÜá´©Å Error cargando llamadas: "+crEsc(e.message)+"<br><span style='color:var(--mut);font-size:12px'>Revisa la anon key y que RLS permita lectura en call_requests / call_results.</span>";}
+    sub.innerHTML=CR_LEADS.length.toLocaleString()+" leads &middot; "+res.length.toLocaleString()+" calls &middot; <b>LIVE from Supabase</b> &middot; "+new Date().toLocaleString();
+  }catch(e){CR_LOADED=false;sub.innerHTML="\u26a0\ufe0f Error loading calls: "+crEsc(e.message)+"<br><span style='color:var(--mut);font-size:12px'>Check the anon key and that RLS allows read on call_requests / call_results.</span>";}
 }
 function crBuild(reqs,res){
   CR_L={};CR_RES=res;
@@ -267,40 +267,40 @@ function crBuild(reqs,res){
   for(const r of res){const k=crPh10(r.p)||('id:'+r.l);if(!k)continue;const o=lead(k);if(r.l&&!o.id)o.id=r.l;if(r.n&&!o.name)o.name=r.n;if(r.p&&!o.phone)o.phone=r.p;const c=o.cn[r.cn]||(o.cn[r.cn]={});c.req=c.req||true;if(!c.oc||(r.dt&&(!c.dt||r.dt>c.dt))){c.oc=r.oc;c.det=r;c.dt=r.dt;}}
   CR_LEADS=Object.values(CR_L);
   for(const o of CR_LEADS){const cns=Object.keys(o.cn).map(Number);o.max=cns.length?Math.max.apply(null,cns):0;
-    const dc=cns.filter(cn=>o.cn[cn].oc);o.maxDone=dc.length?Math.max.apply(null,dc):0;o.frontier=o.maxDone+1;
-    const lastoc=o.maxDone?o.cn[o.maxDone].oc:null;o.lastoc=lastoc;const nx=o.cn[o.frontier];o.hasNext=!!(nx&&nx.req);
-    let st;if(o.maxDone>=10)st='cn10';else if(o.hasNext)st='encurso';else if(CR_TERMINAL.has(lastoc))st='terminal';else if(CR_RETRY.has(lastoc)||(lastoc==null&&o.maxDone>0))st='estancado';else st='encurso';
+    const dc=cns.filter(cn=>o.cn[cn].det);o.maxDone=dc.length?Math.max.apply(null,dc):0;o.frontier=o.maxDone+1;
+    const lastoc=o.maxDone?o.cn[o.maxDone].oc:null;o.lastoc=lastoc;const nx=o.cn[o.frontier];const nxd=nx?(''+(nx.done||'')).toUpperCase():'';o.nxLive=!!(nx&&nx.req&&(nx.done==null||nxd.indexOf('WAITING')>=0));o.nxCancel=!!(nx&&nx.req&&(nxd.indexOf('CANCELLED')>=0||nxd.indexOf('NO PHONE')>=0));o.hasNext=o.nxLive;
+    let st;if(o.maxDone>=10)st='cn10';else if(o.nxLive)st='encurso';else if(o.nxCancel)st='terminal';else if(CR_TERMINAL.has(lastoc))st='terminal';else if(CR_RETRY.has(lastoc)||(lastoc==null&&o.maxDone>0))st='estancado';else st='encurso';
     o.st=st;o.lastdt=Math.max.apply(null,[0].concat(Object.values(o.cn).map(c=>c.dt?Date.parse(c.dt)||0:0)));}
   crKpisRender();crFunnelRender();crRender();
 }
 function crKpisRender(){const stc={cn10:0,encurso:0,terminal:0,estancado:0};for(const o of CR_LEADS)stc[o.st]++;
-  document.getElementById('crKpis').innerHTML=[['Leads en el pipeline',CR_LEADS.length.toLocaleString(),'#4f8cff'],['Llamadas hechas',CR_RES.length.toLocaleString(),'#4f8cff'],['\u{1F534} Estancados',stc.estancado.toLocaleString(),'#ef4444'],['\u{1F7E2} En curso',stc.encurso.toLocaleString(),'#22c55e'],['Ô£à Cerrados',stc.terminal.toLocaleString(),'#94a0c0'],['\u{1F3C1} En cn10',stc.cn10.toLocaleString(),'#22c55e']].map(a=>'<div class="kc" style="border-top-color:'+a[2]+'"><div class="v">'+a[1]+'</div><div class="l">'+a[0]+'</div></div>').join('');}
-function crFunnelRender(){document.getElementById('crLegend').innerHTML=CR_ORDER.filter(o=>CR_OCOL[o]).map(o=>'<span class="li"><span class="sw" style="background:'+CR_OCOL[o]+'"></span>'+o+'</span>').join('')+'<span class="li"><span class="sw" style="background:#3a3f52"></span>sin clasificar</span><span class="li"><span class="sw" style="background:#4f8cff"></span>SCHED = proxima agendada</span><span class="li"><span class="sw" style="background:#ef4444"></span>STUCK = estancado</span>';
+  document.getElementById('crKpis').innerHTML=[['Leads in pipeline',CR_LEADS.length.toLocaleString(),'#4f8cff'],['Calls made',CR_RES.length.toLocaleString(),'#4f8cff'],['\u{1F534} Stranded',stc.estancado.toLocaleString(),'#ef4444'],['\u{1F7E2} In progress',stc.encurso.toLocaleString(),'#22c55e'],['\u2705 Closed',stc.terminal.toLocaleString(),'#94a0c0'],['\u{1F3C1} Reached cn10',stc.cn10.toLocaleString(),'#22c55e']].map(a=>'<div class="kc" style="border-top-color:'+a[2]+'"><div class="v">'+a[1]+'</div><div class="l">'+a[0]+'</div></div>').join('');}
+function crFunnelRender(){document.getElementById('crLegend').innerHTML=CR_ORDER.filter(o=>CR_OCOL[o]).map(o=>'<span class="li"><span class="sw" style="background:'+CR_OCOL[o]+'"></span>'+o+'</span>').join('')+'<span class="li"><span class="sw" style="background:#3a3f52"></span>unclassified</span><span class="li"><span class="sw" style="background:#4f8cff"></span>SCHED = next scheduled</span><span class="li"><span class="sw" style="background:#ef4444"></span>STUCK = stranded</span>';
   let fh='';for(let cn=1;cn<=10;cn++){const solic=CR_LEADS.filter(o=>o.cn[cn]&&o.cn[cn].req).length;const resAt=CR_RES.filter(r=>r.cn===cn);const called=resAt.length;const next=CR_LEADS.filter(o=>o.cn[cn+1]&&o.cn[cn+1].req).length;const oc={};for(const r of resAt){const k=r.oc||'sin';oc[k]=(oc[k]||0)+1;}const tot=called||1;
     const segs=CR_ORDER.concat(['sin']).filter(o=>oc[o]).map(o=>'<div class="cr-fnseg" title="'+o+': '+oc[o]+'" style="width:'+(oc[o]/tot*100).toFixed(1)+'%;background:'+(o==='sin'?'#3a3f52':CR_OCOL[o])+'"></div>').join('');
-    fh+='<div class="cr-fnrow"><div class="cr-fntag">cn'+cn+'<small>follow-up '+cn+'</small></div><div class="cr-fnbar">'+(segs||'<div class="cr-fnseg" style="width:100%;background:#0e1018"></div>')+'</div><div class="cr-fnnums"><b>'+solic.toLocaleString()+'</b> solicitados &middot; <b>'+called.toLocaleString()+'</b> llamados &middot; <b>'+next.toLocaleString()+'</b> &rarr; cn'+(cn+1)+'</div></div>';}
+    fh+='<div class="cr-fnrow"><div class="cr-fntag">cn'+cn+'<small>follow-up '+cn+'</small></div><div class="cr-fnbar">'+(segs||'<div class="cr-fnseg" style="width:100%;background:#0e1018"></div>')+'</div><div class="cr-fnnums"><b>'+solic.toLocaleString()+'</b> requested &middot; <b>'+called.toLocaleString()+'</b> attempts &middot; <b>'+next.toLocaleString()+'</b> &rarr; cn'+(cn+1)+'</div></div>';}
   document.getElementById('crFunnel').innerHTML=fh;}
 function crSetF(el){document.querySelectorAll('#callsView .cr-fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');crFilt=el.dataset.f;crPage=1;crRender();}
-function crRender(){if(!document.getElementById('crHead').innerHTML)document.getElementById('crHead').innerHTML='<th style="text-align:left">Lead</th>'+Array.from({length:10},(_,i)=>'<th>cn'+(i+1)+'</th>').join('')+'<th>Estado</th>';
+function crRender(){if(!document.getElementById('crHead').innerHTML)document.getElementById('crHead').innerHTML='<th style="text-align:left">Lead</th>'+Array.from({length:10},(_,i)=>'<th>cn'+(i+1)+'</th>').join('')+'<th>Status</th>';
   const q=document.getElementById('crQ').value.trim().toLowerCase();let rows=CR_LEADS;if(crFilt!=='all')rows=rows.filter(o=>o.st===crFilt);if(q)rows=rows.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q));
   rows=rows.slice().sort((a,b)=>b.lastdt-a.lastdt);const N=rows.length,M=Math.max(1,Math.ceil(N/CR_PS));if(crPage>M)crPage=M;if(crPage<1)crPage=1;const start=(crPage-1)*CR_PS,shown=rows.slice(start,start+CR_PS);
-  document.getElementById('crCount').textContent=(N?start+1:0)+'ÔÇô'+(start+shown.length)+' de '+N.toLocaleString()+' leads';
-  document.getElementById('crPgbar').innerHTML='<button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage=1;crRender()">┬½</button><button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage--;crRender()">ÔÇ╣ Ant</button><span class="cr-pginfo">Pag '+crPage+' / '+M+'</span><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage++;crRender()">Sig ÔÇ║</button><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage='+M+';crRender()">┬╗</button>';
+  document.getElementById('crCount').textContent=(N?start+1:0)+'\u2013'+(start+shown.length)+' of '+N.toLocaleString()+' leads';
+  document.getElementById('crPgbar').innerHTML='<button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage=1;crRender()">\u00ab</button><button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage--;crRender()">\u2039 Prev</button><span class="cr-pginfo">Page '+crPage+' / '+M+'</span><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage++;crRender()">Next \u203a</button><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage='+M+';crRender()">\u00bb</button>';
   let h='';for(const o of shown){let cells='';for(let cn=1;cn<=10;cn++){const c=o.cn[cn];
-    if(c&&c.oc){cells+='<td><span class="cr-oc" style="background:'+(CR_OCOL[c.oc]||'#3a3f52')+'" onclick="crDetail(\''+o.key+'\','+cn+')">'+crEsc(CR_OSHORT[c.oc]||c.oc)+'</span></td>';}
-    else if(c&&c.req){const du=(''+(c.done||'')).toUpperCase();const sched=du.includes('WAITING')||c.done==null;cells+='<td>'+(sched?'<span class="cr-oc sched" title="Proxima llamada agendada - el run existe">SCHED</span>':'<span class="cr-oc" style="background:#3a3f52;color:#cdd5ec">&middot;</span>')+'</td>';}
-    else if(cn===o.frontier&&o.st==='estancado'){cells+='<td><span class="cr-oc stuck" title="No existe el run de la siguiente llamada - estancado">STUCK</span></td>';}
+    if(c&&c.det){const _oc=c.oc,_bg=_oc?(CR_OCOL[_oc]||'#3a3f52'):'#3a3f52',_lb=_oc?crEsc(CR_OSHORT[_oc]||_oc):'?';cells+='<td><span class="cr-oc" style="background:'+_bg+'" onclick="crDetail(\''+o.key+'\','+cn+')" title="'+(_oc?'':'Called - not classified yet')+'">'+_lb+'</span></td>';}
+    else if(c&&c.req){const du=(''+(c.done||'')).toUpperCase();if(du.indexOf('WAITING')>=0||c.done==null)cells+='<td><span class="cr-oc sched" title="Next call scheduled - the run exists">SCHED</span></td>';else if(du.indexOf('CANCELLED')>=0||du.indexOf('NO PHONE')>=0)cells+='<td><span class="cr-oc" style="background:#2a3147;color:#94a0c0" title="Next call cancelled">CANCEL</span></td>';else cells+='<td><span class="cr-oc" style="background:#3a3f52;color:#cdd5ec">&middot;</span></td>';}
+    else if(cn===o.frontier&&o.st==='estancado'){cells+='<td><span class="cr-oc stuck" title="No next-call run - stranded">STUCK</span></td>';}
     else cells+='<td><span class="cr-oc empty">&middot;</span></td>';}
     const sl=CR_STLAB[o.st]||['','#94a0c0'];
-    h+='<tr><td style="text-align:left">'+(o.id?'<a href="https://crm.zoho.com/crm/org55336697/tab/Leads/'+o.id+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">'+crEsc(o.name||'(sin nombre)')+'</a>':crEsc(o.name||'(sin nombre)'))+'<div style="color:var(--mut);font-size:11px">'+crEsc(o.phone||'')+'</div></td>'+cells+'<td><span class="cr-stbadge" style="background:'+sl[1]+'22;color:'+sl[1]+'">'+sl[0]+' '+(CR_STES[o.st]||o.st)+'</span></td></tr>';}
-  document.getElementById('crBody').innerHTML=h||'<tr><td colspan="12" style="padding:30px;color:var(--mut)">Sin resultados.</td></tr>';
-  document.getElementById('crNotes').innerHTML='<b>Como leer esto.</b> Cada fila es una persona; cn1-cn10 muestran el outcome de cada follow-up (color por tipo). Clic en una celda de color = resultado completo (transcript + outputs de agentes + audio). En la columna del siguiente follow-up: <b style="color:#7fb4ff">SCHED</b> = proxima llamada ya agendada; <b style="color:#ff8f8f">STUCK</b> = estancado (sin run siguiente). Busca, filtra y pagina arriba. Se actualiza solo cada 5 min.';}
+    h+='<tr><td style="text-align:left">'+(o.id?'<a href="https://crm.zoho.com/crm/org55336697/tab/Leads/'+o.id+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">'+crEsc(o.name||'(no name)')+'</a>':crEsc(o.name||'(no name)'))+'<div style="color:var(--mut);font-size:11px">'+crEsc(o.phone||'')+'</div></td>'+cells+'<td><span class="cr-stbadge" style="background:'+sl[1]+'22;color:'+sl[1]+'">'+sl[0]+' '+(CR_STES[o.st]||o.st)+'</span></td></tr>';}
+  document.getElementById('crBody').innerHTML=h||'<tr><td colspan="12" style="padding:30px;color:var(--mut)">No results.</td></tr>';
+  document.getElementById('crNotes').innerHTML='<b>How to read this.</b> Each row is one person; cn1-cn10 show the outcome of each follow-up (colored by type). Click a colored cell to see the full call result (transcript + all agent outputs + audio). In the next follow-up column: <b style="color:#7fb4ff">SCHED</b> = next call already scheduled; <b style="color:#ff8f8f">STUCK</b> = stranded (no next run); <b style="color:#94a0c0">CANCEL</b> = next call cancelled. Search, filter and paginate above. Auto-refreshes every 5 min.';}
 function crDetail(key,cn){const o=CR_L[key];const c=o.cn[cn];const d=c.det;
-  document.getElementById('modalTitle').innerHTML=crEsc(o.name||'')+' &middot; <span style="color:'+(CR_OCOL[c.oc]||'#94a0c0')+'">cn'+cn+' &mdash; '+crEsc(c.oc||'sin outcome')+'</span>';
-  let h='<div class="cr-metarow"><span class="cr-pill">\u{1F4DE} <b>'+crEsc(o.phone||'')+'</b></span><span class="cr-pill">\u{1F4C5} <b>'+(d&&d.dt?new Date(d.dt).toLocaleString():'ÔÇö')+'</b></span><span class="cr-pill">ÔÅ▒´©Å <b>'+(d&&d.du!=null?d.du+'s':'ÔÇö')+'</b></span>'+(d&&d.au?'<span class="cr-pill">\u{1F50A} <a href="'+crEsc(d.au)+'" target="_blank" style="color:var(--accent)">audio</a></span>':'')+'</div>';
-  const A=[['Call Outcome (agente)',c.oc],['Outcome Reason',d&&d.or],['Interest Level (agente)',d&&d.il],['Follow Up Needed / Date',d?((d.fn||'ÔÇö')+(d.fu?(' ┬À '+d.fu):'')):null],['AI Bot Notes (agente)',d&&d.an],['Resumen',d&&d.su],['Transcript',d&&d.tx]];
+  document.getElementById('modalTitle').innerHTML=crEsc(o.name||'')+' &middot; <span style="color:'+(CR_OCOL[c.oc]||'#94a0c0')+'">cn'+cn+' &mdash; '+crEsc(c.oc||'no outcome')+'</span>';
+  let h='<div class="cr-metarow"><span class="cr-pill">\u{1F4DE} <b>'+crEsc(o.phone||'')+'</b></span><span class="cr-pill">\u{1F4C5} <b>'+(d&&d.dt?new Date(d.dt).toLocaleString():'\u2014')+'</b></span><span class="cr-pill">\u23f1\ufe0f <b>'+(d&&d.du!=null?d.du+'s':'\u2014')+'</b></span>'+(d&&d.au?'<span class="cr-pill">\u{1F50A} <a href="'+crEsc(d.au)+'" target="_blank" style="color:var(--accent)">audio</a></span>':'')+'</div>';
+  const A=[['Call Outcome (agent)',c.oc],['Outcome Reason',d&&d.or],['Interest Level (agent)',d&&d.il],['Follow Up Needed / Date',d?((d.fn||'\u2014')+(c.fu?(' \u00b7 '+c.fu):'')):null],['AI Bot Notes (agent)',d&&d.an],['Summary',d&&d.su],['Transcript',d&&d.tx]];
   for(const a of A){if(a[1]==null||a[1]==='')continue;h+='<div class="cr-agent"><div class="al">'+a[0]+'</div><div class="av">'+crEsc(a[1])+'</div></div>';}
   document.getElementById('modalBody').innerHTML=h;document.getElementById('overlay').style.display='flex';}
 
-async function load(){const sub=document.getElementById("sub");try{sub.textContent="ÔÅ│ Loading live data from ZohoÔÇª";const[lr,dr]=await Promise.all([fetch(LEADS_URL).then(r=>r.json()),fetch(DEALS_URL).then(r=>r.json())]);LEADS=lr.leads||[];DEALS=dr.deals||[];lSel=new Set(lOwnersOf("All"));dSel=new Set(DEALS.map(x=>x.o));sub.textContent=LEADS.length.toLocaleString()+" leads ┬À "+DEALS.length.toLocaleString()+" deals ┬À LIVE from Zoho ┬À updated "+new Date().toLocaleString();lRender();dRender();}catch(e){sub.textContent="ÔÜá´©Å Error loading live data: "+e;}}load();setInterval(load,300000);setInterval(function(){if(CR_LOADED&&document.getElementById("callsView").style.display!=="none"){CR_LOADED=false;loadCalls(true);}},300000);
+async function load(){const sub=document.getElementById("sub");try{sub.textContent="\u23f3 Loading live data from Zoho\u2026";const[lr,dr]=await Promise.all([fetch(LEADS_URL).then(r=>r.json()),fetch(DEALS_URL).then(r=>r.json())]);LEADS=lr.leads||[];DEALS=dr.deals||[];lSel=new Set(lOwnersOf("All"));dSel=new Set(DEALS.map(x=>x.o));sub.textContent=LEADS.length.toLocaleString()+" leads \u00b7 "+DEALS.length.toLocaleString()+" deals \u00b7 LIVE from Zoho \u00b7 updated "+new Date().toLocaleString();lRender();dRender();}catch(e){sub.textContent="\u26a0\ufe0f Error loading live data: "+e;}}load();setInterval(load,300000);setInterval(function(){if(CR_LOADED&&document.getElementById("callsView").style.display!=="none"){CR_LOADED=false;loadCalls(true);}},300000);
 </script></body></html>
