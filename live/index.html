@@ -83,6 +83,23 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 .cr-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 11px;font-size:12px;color:var(--mut)}.cr-pill b{color:var(--txt)}
 .cr-stbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
 
+.iav-btn{cursor:pointer;border:1px solid #7c5cff;background:linear-gradient(90deg,rgba(124,92,255,.22),rgba(79,140,255,.18));color:#cfc3ff;border-radius:10px;padding:8px 16px;font-weight:700;font-size:12.5px;letter-spacing:.4px}
+.iav-btn:hover{background:rgba(124,92,255,.35)}
+.iav-btn.on{background:#7c5cff;color:#fff}
+.iav-bar{display:none;align-items:center;gap:12px;background:rgba(124,92,255,.1);border:1px solid #7c5cff;border-radius:12px;padding:10px 14px;margin-bottom:12px;flex-wrap:wrap}
+.iav-bar b{color:#cfc3ff}
+.iav-go{cursor:pointer;border:none;background:#7c5cff;color:#fff;border-radius:9px;padding:8px 18px;font-weight:700;font-size:13px}
+.iav-go[disabled]{opacity:.4;cursor:default}
+.iav-cancel{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:9px;padding:8px 14px;font-weight:600}
+.iav-ck{width:15px;height:15px;accent-color:#7c5cff;cursor:pointer}
+.iav-prog{height:14px;background:#0e1018;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:10px 0}
+.iav-prog>div{height:100%;background:linear-gradient(90deg,#7c5cff,#4f8cff);transition:width .4s;width:0%}
+.iav-step{padding:16px 20px}
+.iav-sec{margin:16px 0 6px;font-size:12px;letter-spacing:.4px;color:var(--mut);font-weight:700}
+.iav-tbl{width:100%;font-size:12.5px}.iav-tbl td,.iav-tbl th{text-align:left;white-space:nowrap}.iav-tbl td:first-child{position:static;background:transparent}
+.iav-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:700}
+.iav-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
+
 </style></head><body><div class="wrap">
 <div class="brand"><h1>PTS &#8212; Lead Funnel &amp; Deal Pipeline Report</h1><span class="tag">LIVE</span></div>
 <div class="sub" id="sub"></div>
@@ -123,6 +140,15 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
     <span class="cr-fchip" data-f="encurso" onclick="crSetF(this)">&#128994; In progress</span>
     <span class="cr-fchip" data-f="terminal" onclick="crSetF(this)">&#9989; Closed</span>
     <span class="cr-fchip" data-f="cn10" onclick="crSetF(this)">&#127937; Completed</span>
+    <span style="flex:1"></span>
+    <button class="iav-btn" id="iavBtn" onclick="iavToggle()">&#129302; IA VERIFICATION</button>
+  </div>
+  <div class="iav-bar" id="iavBar">
+    <b id="iavCount">0 selected</b>
+    <span style="color:var(--mut);font-size:12px">Tick the leads you want the AI to verify &amp; re-organize (Zoho notes + Supabase). Selection works across pages and filters.</span>
+    <span style="flex:1"></span>
+    <button class="iav-go" id="iavGo" onclick="iavStart()" disabled>Process selected</button>
+    <button class="iav-cancel" onclick="iavToggle()">Cancel</button>
   </div>
   <div class="cr-ctrl" style="margin-top:-4px"><span class="cr-count" id="crCount"></span><div class="cr-pgbar" id="crPgbar"></div></div>
   <div class="hscroll"><table id="crJourney"><thead><tr id="crHead"></tr></thead><tbody id="crBody"></tbody></table></div>
@@ -130,6 +156,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 </div>
 
 <div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">&#10005;</span></div><div class="modalbody" id="modalBody"></div></div></div>
+<div class="overlay" id="iavOverlay"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="iavTitle">&#129302; IA Verification</b><span class="x" onclick="iavClose()">&#10005;</span></div><div class="modalbody" id="iavBody"></div></div></div>
 </div>
 <script>
 let LEADS=[],DEALS=[];const LEADS_URL="https://n8n.pts-automation.cloud/webhook/report-leads-live",DEALS_URL="https://n8n.pts-automation.cloud/webhook/report-deals-live";
@@ -281,7 +308,7 @@ function crFunnelRender(){document.getElementById('crLegend').innerHTML=CR_ORDER
     fh+='<div class="cr-fnrow"><div class="cr-fntag">cn'+cn+'<small>follow-up '+cn+'</small></div><div class="cr-fnbar">'+(segs||'<div class="cr-fnseg" style="width:100%;background:#0e1018"></div>')+'</div><div class="cr-fnnums"><b>'+solic.toLocaleString()+'</b> requested &middot; <b>'+called.toLocaleString()+'</b> attempts &middot; <b>'+next.toLocaleString()+'</b> &rarr; cn'+(cn+1)+'</div></div>';}
   document.getElementById('crFunnel').innerHTML=fh;}
 function crSetF(el){document.querySelectorAll('#callsView .cr-fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');crFilt=el.dataset.f;crPage=1;crRender();}
-function crRender(){if(!document.getElementById('crHead').innerHTML)document.getElementById('crHead').innerHTML='<th style="text-align:left">Lead</th>'+Array.from({length:10},(_,i)=>'<th>cn'+(i+1)+'</th>').join('')+'<th>Status</th>';
+function crRender(){document.getElementById('crHead').innerHTML=(iavMode?'<th style="width:28px"><input type="checkbox" class="iav-ck" onclick="iavAllPage(this)" title="Select all on this page"></th>':'')+'<th style="text-align:left">Lead</th>'+Array.from({length:10},(_,i)=>'<th>cn'+(i+1)+'</th>').join('')+'<th>Status</th>';
   const q=document.getElementById('crQ').value.trim().toLowerCase();let rows=CR_LEADS;if(crFilt!=='all')rows=rows.filter(o=>o.st===crFilt);if(q)rows=rows.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q));
   rows=rows.slice().sort((a,b)=>b.lastdt-a.lastdt);const N=rows.length,M=Math.max(1,Math.ceil(N/CR_PS));if(crPage>M)crPage=M;if(crPage<1)crPage=1;const start=(crPage-1)*CR_PS,shown=rows.slice(start,start+CR_PS);
   document.getElementById('crCount').textContent=(N?start+1:0)+'\u2013'+(start+shown.length)+' of '+N.toLocaleString()+' leads';
@@ -292,7 +319,8 @@ function crRender(){if(!document.getElementById('crHead').innerHTML)document.get
     else if(cn===o.frontier&&o.st==='estancado'){cells+='<td><span class="cr-oc stuck" title="No next-call run - stranded">STUCK</span></td>';}
     else cells+='<td><span class="cr-oc empty">&middot;</span></td>';}
     const sl=CR_STLAB[o.st]||['','#94a0c0'];
-    h+='<tr><td style="text-align:left">'+(o.id?'<a href="https://crm.zoho.com/crm/org55336697/tab/Leads/'+o.id+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">'+crEsc(o.name||'(no name)')+'</a>':crEsc(o.name||'(no name)'))+'<div style="color:var(--mut);font-size:11px">'+crEsc(o.phone||'')+'</div></td>'+cells+'<td><span class="cr-stbadge" style="background:'+sl[1]+'22;color:'+sl[1]+'">'+sl[0]+' '+(CR_STES[o.st]||o.st)+'</span></td></tr>';}
+    const ck=iavMode?('<td style="position:static;background:transparent">'+(o.id?'<input type="checkbox" class="iav-ck iav-rowck" data-k="'+crEsc(o.key)+'" '+(iavSel.has(o.key)?'checked':'')+' onclick="iavTick(this.dataset.k,this)">':'<span class="cr-oc empty" title="No Zoho lead id - cannot process">&middot;</span>')+'</td>'):'';
+    h+='<tr>'+ck+'<td style="text-align:left">'+(o.id?'<a href="https://crm.zoho.com/crm/org55336697/tab/Leads/'+o.id+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">'+crEsc(o.name||'(no name)')+'</a>':crEsc(o.name||'(no name)'))+'<div style="color:var(--mut);font-size:11px">'+crEsc(o.phone||'')+'</div></td>'+cells+'<td><span class="cr-stbadge" style="background:'+sl[1]+'22;color:'+sl[1]+'">'+sl[0]+' '+(CR_STES[o.st]||o.st)+'</span></td></tr>';}
   document.getElementById('crBody').innerHTML=h||'<tr><td colspan="12" style="padding:30px;color:var(--mut)">No results.</td></tr>';
   document.getElementById('crNotes').innerHTML='<b>How to read this.</b> Each row is one person; cn1-cn10 show the outcome of each follow-up (colored by type). Click a colored cell to see the full call result (transcript + all agent outputs + audio). In the next follow-up column: <b style="color:#7fb4ff">SCHED</b> = next call already scheduled; <b style="color:#ff8f8f">STUCK</b> = stranded (no next run); <b style="color:#94a0c0">CANCEL</b> = next call cancelled. Search, filter and paginate above. Auto-refreshes every 5 min.';}
 function crDetail(key,cn){const o=CR_L[key];const c=o.cn[cn];const d=c.det;
@@ -301,6 +329,97 @@ function crDetail(key,cn){const o=CR_L[key];const c=o.cn[cn];const d=c.det;
   const A=[['Call Outcome (agent)',c.oc],['Outcome Reason',d&&d.or],['Interest Level (agent)',d&&d.il],['Follow Up Needed / Date',d?((d.fn||'\u2014')+(c.fu?(' \u00b7 '+c.fu):'')):null],['AI Bot Notes (agent)',d&&d.an],['Summary',d&&d.su],['Transcript',d&&d.tx]];
   for(const a of A){if(a[1]==null||a[1]==='')continue;h+='<div class="cr-agent"><div class="al">'+a[0]+'</div><div class="av">'+crEsc(a[1])+'</div></div>';}
   document.getElementById('modalBody').innerHTML=h;document.getElementById('overlay').style.display='flex';}
+
+// ===== IA VERIFICATION (rescue stuck leads via n8n) =====
+const IAV_TOKEN='pts-iav-2026';
+const IAV_PROC='https://n8n.pts-automation.cloud/webhook/ia-verification-process';
+const IAV_APPR='https://n8n.pts-automation.cloud/webhook/ia-verification-approve';
+let iavMode=false,iavSel=new Set(),iavJob=null,iavPoll=null,iavProcRows=[];
+function iavToggle(){iavMode=!iavMode;iavSel=new Set();document.getElementById('iavBar').style.display=iavMode?'flex':'none';document.getElementById('iavBtn').classList.toggle('on',iavMode);iavCount();crRender();}
+function iavCount(){const n=iavSel.size;document.getElementById('iavCount').textContent=n.toLocaleString()+' selected';document.getElementById('iavGo').disabled=!n;}
+function iavTick(k,el){if(el.checked)iavSel.add(k);else iavSel.delete(k);iavCount();}
+function iavAllPage(el){document.querySelectorAll('#crBody .iav-rowck').forEach(c=>{c.checked=el.checked;const k=c.dataset.k;if(!k)return;if(el.checked)iavSel.add(k);else iavSel.delete(k);});iavCount();}
+async function iavLogRows(phase){try{const r=await fetch(SUPA_URL+'/rest/v1/ia_verification_log?job_id=eq.'+iavJob+'&phase=eq.'+phase+'&select=id,lead_id,lead_name,status,detail&order=id&limit=3000',{headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON}});return r.ok?await r.json():[];}catch(e){return [];}}
+function iavOpen(html){document.getElementById('iavBody').innerHTML=html;document.getElementById('iavOverlay').style.display='flex';}
+function iavClose(){if(iavPoll){clearInterval(iavPoll);iavPoll=null;}document.getElementById('iavOverlay').style.display='none';}
+function iavPBar(p,label){return '<div style="color:var(--mut);font-size:12.5px;margin-top:10px">'+label+'</div><div class="iav-prog"><div style="width:'+p+'%"></div></div>';}
+function iavLeadLink(r){return r.lead_id?'<a href="https://crm.zoho.com/crm/org55336697/tab/Leads/'+r.lead_id+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">'+crEsc(r.lead_name||r.lead_id)+'</a>':crEsc(r.lead_name||'-');}
+function iavBadge(s){const M={completed:['COMPLETED (10+)','#22c55e'],terminal:['STOP OUTCOME','#a855f7'],continue:['CONTINUE','#4f8cff'],already_scheduled:['ALREADY SCHEDULED','#7fb4ff'],skip:['NO CALLS FOUND','#64748b'],error:['ERROR','#ef4444']};const a=M[s]||[s,'#64748b'];return '<span class="iav-badge" style="background:'+a[1]+'22;color:'+a[1]+'">'+a[0]+'</span>';}
+async function iavPost(url,body){try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return r.ok;}catch(e){return false;}}
+async function iavStart(){
+  const sel=[...iavSel].map(k=>CR_L[k]).filter(o=>o&&o.id);
+  if(!sel.length)return;
+  iavJob='iav-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);
+  const total=sel.length,CH=50;
+  const leads=sel.map((o,i)=>({lead_id:o.id,idx:i}));
+  iavOpen('<div class="iav-step"><b>Step 1 of 3 &mdash; Processing '+total+' lead(s)</b><div style="color:var(--mut);font-size:12.5px;margin-top:6px">For each lead the AI reads its Zoho notes, counts OUR logged calls in order, maps them to cn1..cn10 by count (redials count as follow-ups), detects stop-outcomes (Booked / Transfer / Not Interested / Wrong Number / Disqualified) and organizes everything in Supabase. Processed one by one, in batches of '+CH+'.</div><div id="iavP1">'+iavPBar(2,'Sending first batch...')+'</div></div>');
+  await iavPost(IAV_PROC,{token:IAV_TOKEN,job_id:iavJob,total:total,leads:leads.slice(0,CH)});
+  let sent=Math.min(CH,total),busy=false,lastDone=-1,stall=0;
+  iavPoll=setInterval(async function(){
+    if(busy)return;busy=true;
+    try{
+      const rows=await iavLogRows('process');
+      const done=rows.length;
+      if(done===lastDone)stall++;else{stall=0;lastDone=done;}
+      const p=document.getElementById('iavP1');
+      if(p)p.innerHTML=iavPBar(Math.max(2,Math.round(done/total*100)),done+' / '+total+' processed'+(stall>40?' &middot; <span style="color:#eab308">slower than usual, still working...</span>':''));
+      if(done>=sent&&sent<total){const nx=leads.slice(sent,sent+CH);await iavPost(IAV_PROC,{token:IAV_TOKEN,job_id:iavJob,total:total,leads:nx});sent+=nx.length;}
+      if(done>=total){clearInterval(iavPoll);iavPoll=null;iavProcRows=rows;iavReport();}
+      if(stall>120){clearInterval(iavPoll);iavPoll=null;iavProcRows=rows;iavReport('Some leads did not report back ('+done+' of '+total+' finished). Showing what completed - you can re-run the missing ones.');}
+    }finally{busy=false;}
+  },3000);
+}
+function iavReport(warn){
+  const rows=iavProcRows;const by={};for(const r of rows){(by[r.status]=by[r.status]||[]).push(r);}
+  const cont=(by['continue']||[]);
+  const groups=[['completed','Reached 10+ calls &mdash; marked COMPLETED, no more calls.'],['terminal','Had a stop-outcome &mdash; organized up to that call and CLOSED (will not be called again).'],['already_scheduled','Already has a live scheduled run &mdash; history organized, nothing else touched.'],['skip','No calls found in Zoho or Supabase &mdash; left untouched.'],['error','Could not be processed &mdash; check the lead in Zoho.']];
+  let h='<div class="iav-step"><b>Step 2 of 3 &mdash; Processing report</b><div style="color:var(--mut);font-size:12.5px;margin:6px 0 2px">Everything below is already written to Supabase &mdash; the Call Results tab reflects it live.</div>';
+  if(warn)h+='<div style="background:rgba(234,179,8,.12);border:1px solid #eab308;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#eab308">'+warn+'</div>';
+  for(const g of groups){const arr=by[g[0]];if(!arr||!arr.length)continue;
+    h+='<div class="iav-sec">'+iavBadge(g[0])+' &nbsp;'+arr.length+' lead(s) <span style="font-weight:400">&mdash; '+g[1]+'</span></div>';
+    h+='<div class="hscroll" style="max-height:220px;overflow-y:auto"><table class="iav-tbl"><thead><tr><th>Lead</th><th>Calls</th><th>Last / stop outcome</th><th>Zoho status</th></tr></thead><tbody>';
+    for(const r of arr){const d=r.detail||{};const last=d.terminal_outcome||(d.timeline&&d.timeline.length?d.timeline[d.timeline.length-1]:null)||(d.reason||'-');
+      h+='<tr><td>'+iavLeadLink(r)+'</td><td>'+(d.organized_upto!=null?(d.organized_upto+' / '+(d.total_calls!=null?d.total_calls:'-')):'-')+'</td><td>'+crEsc(last)+'</td><td>'+crEsc(d.zoho_status||'-')+'</td></tr>';}
+    h+='</tbody></table></div>';}
+  h+='<div class="iav-sec" style="margin-top:18px">'+iavBadge('continue')+' &nbsp;'+cont.length+' lead(s) <span style="font-weight:400">&mdash; un-stuck: fewer than 10 calls and no stop-outcome. They need their next follow-up. Review and approve on the next step.</span></div>';
+  h+='</div><div class="iav-foot"><button class="iav-cancel" onclick="iavFinish()">Close (organize only)</button>'+(cont.length?'<button class="iav-go" onclick="iavApproveView()">Next: review '+cont.length+' call(s) to schedule &rsaquo;</button>':'')+'</div>';
+  iavOpen(h);
+}
+function iavApproveView(){
+  const cont=iavProcRows.filter(r=>r.status==='continue');
+  let h='<div class="iav-step"><b>Step 3 of 3 &mdash; Approve the calls to schedule</b><div style="color:var(--mut);font-size:12.5px;margin:6px 0 10px">Each approved lead gets its next follow-up at the exact time shown (staggered inside its correct calling window, next business day, US holidays skipped). The normal production dispatchers pick it up, hold it in a WAIT run, and fire the call at that time &mdash; same as always. Leads whose current Zoho status is <b>not callable</b> (Bad Contact Info, Replied, Booked, Unresponsive...) come <b>unchecked</b> &mdash; you have the final say.</div>';
+  h+='<div class="hscroll" style="max-height:380px;overflow-y:auto"><table class="iav-tbl"><thead><tr><th><input type="checkbox" class="iav-ck" checked onclick="iavApprAll(this)" title="Toggle all"></th><th>Lead</th><th>Calls so far</th><th>Next</th><th>Scheduled time</th><th>Zoho status</th></tr></thead><tbody>';
+  cont.forEach(function(r,i){const d=r.detail||{};const ok=!!d.callable;
+    h+='<tr><td><input type="checkbox" class="iav-ck iav-appr" data-i="'+i+'" '+(ok?'checked':'')+' onclick="iavApprCount()"></td><td>'+iavLeadLink(r)+'</td><td>'+(d.organized_upto||0)+' done</td><td><b>cn'+(d.cn_next||'?')+'</b></td><td>'+crEsc(d.proposed_time_display||d.proposed_time||'-')+'</td><td><span style="color:'+(ok?'#22c55e':'#ef4444')+';font-weight:600">'+crEsc(d.zoho_status||'?')+(ok?'':' &middot; not callable')+'</span></td></tr>';});
+  h+='</tbody></table></div></div><div class="iav-foot"><button class="iav-cancel" onclick="iavReport()">&lsaquo; Back</button><button class="iav-go" id="iavApprGo" onclick="iavApprove()">Schedule <span id="iavApprN">0</span> call(s)</button></div>';
+  iavOpen(h);iavApprCount();
+}
+function iavApprAll(el){document.querySelectorAll('.iav-appr').forEach(c=>{c.checked=el.checked;});iavApprCount();}
+function iavApprCount(){const n=document.querySelectorAll('.iav-appr:checked').length;const s=document.getElementById('iavApprN');if(s)s.textContent=n;const g=document.getElementById('iavApprGo');if(g)g.disabled=!n;}
+async function iavApprove(){
+  const cont=iavProcRows.filter(r=>r.status==='continue');
+  const picked=[...document.querySelectorAll('.iav-appr:checked')].map(c=>cont[Number(c.dataset.i)]).filter(Boolean);
+  if(!picked.length)return;
+  const leads=picked.map(function(r){const d=r.detail||{};return {lead_id:r.lead_id,cn_next:d.cn_next,time:d.proposed_time,phone:d.phone||'',lead_name:r.lead_name||''};});
+  iavOpen('<div class="iav-step"><b>Scheduling '+leads.length+' call(s)...</b><div style="color:var(--mut);font-size:12.5px;margin-top:6px">Creating each next-call request, then verifying that every lead ends up with its run <b>WAITING</b> for its exact window (the dispatcher check takes about 5 minutes). You can keep this open or come back later &mdash; everything runs in n8n.</div><div id="iavP2">'+iavPBar(3,'Sending...')+'</div><div id="iavDoneBox"></div></div>');
+  await iavPost(IAV_APPR,{token:IAV_TOKEN,job_id:iavJob,leads:leads});
+  const total=leads.length;let busy=false;
+  iavPoll=setInterval(async function(){
+    if(busy)return;busy=true;
+    try{
+      const rows=await iavLogRows('approve');
+      const created=rows.filter(r=>r.status==='created').length;
+      const done=rows.find(r=>r.status==='job_done');
+      const p=document.getElementById('iavP2');
+      if(!done){if(p)p.innerHTML=iavPBar(Math.max(3,Math.round(created/total*70)),created+' / '+total+' created &middot; verifying runs with the dispatchers (~5 min)...');}
+      else{clearInterval(iavPoll);iavPoll=null;const d=done.detail||{};
+        if(p)p.innerHTML=iavPBar(100,'Done');
+        const pend=rows.filter(r=>r.status==='pending_pickup');
+        document.getElementById('iavDoneBox').innerHTML='<div style="background:rgba(34,197,94,.1);border:1px solid #22c55e;border-radius:12px;padding:16px;margin-top:12px"><b style="color:#22c55e">&#9989; All processed &mdash; calls scheduled!</b><div style="margin-top:6px;font-size:13px;line-height:1.6">'+(d.scheduled||0)+' call(s) verified with their run <b style="color:#7fb4ff">WAITING</b> for the assigned window'+((d.pending||0)?(' &middot; <b style="color:#eab308">'+d.pending+' pending pickup</b> (the dispatcher grabs them within minutes; refresh Call Results to confirm they turn into SCHED)'):'')+((d.called||0)?(' &middot; '+d.called+' already called'):'')+'.<br>The Call Results tab is live &mdash; these leads now show <b style="color:#7fb4ff">SCHED</b> on their next follow-up.</div>'+(pend.length?'<div style="color:var(--mut);font-size:12px;margin-top:6px">Pending: '+pend.map(r=>crEsc(r.lead_name||r.lead_id)).join(', ')+'</div>':'')+'<div class="iav-foot" style="border:none;padding:14px 0 0"><button class="iav-go" onclick="iavFinish()">Close &amp; refresh</button></div></div>';}
+    }finally{busy=false;}
+  },5000);
+}
+function iavFinish(){iavClose();iavMode=false;iavSel=new Set();document.getElementById('iavBar').style.display='none';document.getElementById('iavBtn').classList.remove('on');CR_LOADED=false;loadCalls(true);}
 
 async function load(){const sub=document.getElementById("sub");try{sub.textContent="\u23f3 Loading live data from Zoho\u2026";const[lr,dr]=await Promise.all([fetch(LEADS_URL).then(r=>r.json()),fetch(DEALS_URL).then(r=>r.json())]);LEADS=lr.leads||[];DEALS=dr.deals||[];lSel=new Set(lOwnersOf("All"));dSel=new Set(DEALS.map(x=>x.o));sub.textContent=LEADS.length.toLocaleString()+" leads \u00b7 "+DEALS.length.toLocaleString()+" deals \u00b7 LIVE from Zoho \u00b7 updated "+new Date().toLocaleString();lRender();dRender();}catch(e){sub.textContent="\u26a0\ufe0f Error loading live data: "+e;}}load();setInterval(load,300000);setInterval(function(){if(CR_LOADED&&document.getElementById("callsView").style.display!=="none"){CR_LOADED=false;loadCalls(true);}},300000);
 </script></body></html>
