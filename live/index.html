@@ -18,6 +18,18 @@ h2.sh{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu
 .ochip{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;background:var(--card)}
 .ochip .cdot{width:9px;height:9px;border-radius:50%;background:var(--accent)}.ochip b{color:var(--txt)}.ochip .oc{color:var(--accent);font-weight:700}
 .ochip.on{border-color:var(--accent);background:rgba(79,140,255,.14)}.ochip.off{opacity:.5;border-style:dashed}.ochip.off .cdot{background:#444c66}.ochip.off b{color:var(--mut)}.ochip.off .oc{color:var(--mut)}
+.tagwrap{position:relative;display:inline-block;vertical-align:middle}
+.tagbtn{cursor:pointer;user-select:none;border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:20px;padding:5px 13px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.tagbtn:hover{border-color:var(--accent)}
+.tagbtn .cnt{background:var(--accent);color:#fff;border-radius:10px;padding:0 7px;font-size:11px;font-weight:700}
+.tagpanel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:min(620px,92vw);box-shadow:0 18px 55px rgba(0,0,0,.55)}
+.tagpanel.open{display:block}
+.tagpanel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.tagpanel .hd b{font-size:13px}
+.tagpanel .opts{display:flex;flex-wrap:wrap;gap:7px;max-height:250px;overflow-y:auto;padding:2px}
+.tagpanel .act{color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;user-select:none}
+.tagpanel .act:hover{text-decoration:underline}
+
 .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
 .pc{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;border-top:3px solid}
 .pc .v{font-size:26px;font-weight:700;line-height:1}.pc .pct{font-size:13px;font-weight:700;margin-left:8px}.pc .nm{font-weight:700;margin:6px 0 4px}.pc .ds{color:var(--mut);font-size:11px;line-height:1.5}
@@ -109,7 +121,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
   <div class="sec" id="secCalls" onclick="showSection('calls')">&#128222; Call Results</div>
 </div>
 <div id="leadsView">
-  <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div><div class="ochips" id="tags"></div>
+  <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div><div id="tagbar" style="margin:2px 0 6px"></div>
   <h2 class="sh">Lead Funnel</h2><div class="cards" id="pipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="cards"></div>
   <h2 class="sh">Stage &#215; Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
@@ -238,7 +250,16 @@ function openLeadModal(title,d){document.getElementById("modalTitle").innerHTML=
 function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key==='NonICP'?'Non-ICP':key+' Tier'):key;openLeadModal(`${stage} \u00b7 <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lToggleTag(t){lTagSel.has(t)?lTagSel.delete(t):lTagSel.add(t);lRender();}
 function lToggleGroup(g){lGroupC.has(g)?lGroupC.delete(g):lGroupC.add(g);lRender();}
-function tagChips(data,sel,fn,el){const c={};for(const x of data)for(const t of (x.tags||[]))c[t]=(c[t]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);const box=document.getElementById(el);if(!box)return;if(!arr.length){box.innerHTML='';return;}box.innerHTML='<span class="lbl">Tags (click to toggle):</span>'+arr.map(([t,n])=>`<span class="ochip ${sel.has(t)?'on':'off'}" onclick="${fn}('${t.replace(/'/g,"\\'")}')"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b><span class="oc">${n.toLocaleString()}</span></span>`).join("");}
+let tagPanelOpen=false;
+function toggleTagPanel(e){if(e)e.stopPropagation();tagPanelOpen=!tagPanelOpen;const p=document.getElementById('tagpanel');if(p)p.classList.toggle('open',tagPanelOpen);}
+function closeTagPanel(){tagPanelOpen=false;const p=document.getElementById('tagpanel');if(p)p.classList.remove('open');}
+function clearTags(){lTagSel=new Set();lRender();}
+document.addEventListener('click',function(e){if(tagPanelOpen&&e.target&&!e.target.closest('.tagwrap'))closeTagPanel();});
+function renderTagBar(data){const c={};for(const x of data)for(const t of (x.tags||[]))c[t]=(c[t]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);const box=document.getElementById('tagbar');if(!box)return;if(!arr.length){box.innerHTML='';return;}const sel=lTagSel;
+  const opts=arr.map(([t,n])=>`<span class="ochip ${sel.has(t)?'on':'off'}" onclick="lToggleTag('${t.replace(/'/g,"\\'")}')"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b><span class="oc">${n.toLocaleString()}</span></span>`).join('');
+  const pills=[...sel].map(t=>`<span class="ochip on" style="cursor:pointer" onclick="lToggleTag('${t.replace(/'/g,"\\'")}')" title="Remove filter"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b> ✕</span>`).join('');
+  box.innerHTML=`<span class="lbl" style="margin-right:6px">Tags:</span><span class="tagwrap"><span class="tagbtn" onclick="toggleTagPanel(event)">🏷️ Filter by tags${sel.size?` <span class="cnt">${sel.size}</span>`:''} ▾</span><div class="tagpanel${tagPanelOpen?' open':''}" id="tagpanel"><div class="hd"><b>Select tags to filter</b><span class="act" onclick="clearTags()">Clear all</span></div><div class="opts">${opts}</div><div style="text-align:right;margin-top:10px"><span class="act" onclick="closeTagPanel()">Done ✓</span></div></div></span>${sel.size?`<span style="display:inline-flex;flex-wrap:wrap;gap:7px;margin-left:8px;vertical-align:middle">${pills}</span>`:''}`;
+}
 function lTierLbl(k){return k==='None'?'No Rating':k==='Unknown'?'Unknown':k==='NonICP'?'Non-ICP':k+' Tier';}
 function lColKey(k){return TIERCOL[k]||TIERCOL[(META.ratings.find(c=>c.r===k)||{tier:'Unknown'}).tier];}
 function lDrillStage(st){const d=lFlt().filter(x=>x.s===st);openLeadModal(`${st} <span class="muted" style="font-weight:400">— all ratings · ${d.length} leads</span>`,d);}
@@ -248,7 +269,7 @@ function lDrillGroupTot(g){const d=lFlt().filter(x=>x.g===g);openLeadModal(`${g}
 function lDrillAll(){const d=lFlt();openLeadModal(`All leads in view <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
 function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
   ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
-  tagChips(LEADS.filter(x=>lSel.has(x.o)),lTagSel,"lToggleTag","tags");
+  renderTagBar(LEADS.filter(x=>lSel.has(x.o)));
   const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
   document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
