@@ -121,6 +121,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
   <div class="sec" id="secCalls" onclick="showSection('calls')">&#128222; Call Results</div>
 </div>
 <div id="leadsView">
+  <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px"><span style="color:var(--mut);font-size:12px">&#128455; Layout:</span><select id="lySel" onchange="lySet(this.value)" style="background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12.5px;cursor:pointer"></select></div>
   <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div><div id="tagbar" style="margin:2px 0 6px"></div>
   <div class="cr-ctrl" id="cqCtrl" style="display:none">
     <span style="color:var(--mut);font-size:12px">&#128222; <b>Call Queue</b> &mdash; select AI-owned leads from any cell popup and send them to the calling funnel (Inbound MQL).</span>
@@ -251,8 +252,12 @@ const LGCOL={"Productive Stages":"#4f8cff","Recycle Stages":"#a78bfa","Disposal 
 const LGDESC={"Productive Stages":"Active in the funnel: "+META.productive.join(" \u00b7 "),"Recycle Stages":"To re-engage: "+META.recycle.join(" \u00b7 "),"Disposal Stages":"Routed out / closed: "+META.disposal.join(" \u00b7 ")};
 const LAYERS=[["All","All Leads"],["Sales","Sales Owned"],["AI","AI Owned"],["Other","Others"]];
 let lLayer="All", lSel=new Set(), lExpanded=new Set(), lTagSel=new Set(), lGroupC=new Set();
-function lOwnersOf(L){return [...new Set((L==="All"?LEADS:LEADS.filter(x=>x.L===L)).map(x=>x.o))];}
-function lFlt(){return LEADS.filter(x=>lSel.has(x.o)&&(lTagSel.size===0||(x.tags||[]).some(t=>lTagSel.has(t))));}
+let lLayout="Standard";const LY_OPTS=["Standard","Marketing Funnel"];
+function lyOf(x){return x.ly==="Marketing Funnel"?"Marketing Funnel":"Standard";}
+function lyBase(){return LEADS.filter(x=>lyOf(x)===lLayout);}
+function lySet(v){lLayout=v;lSel=new Set(lOwnersOf(lLayer));lRender();}
+function lOwnersOf(L){const B=lyBase();return [...new Set((L==="All"?B:B.filter(x=>x.L===L)).map(x=>x.o))];}
+function lFlt(){return lyBase().filter(x=>lSel.has(x.o)&&(lTagSel.size===0||(x.tags||[]).some(t=>lTagSel.has(t))));}
 function lSetLayer(L){lLayer=L;lSel=new Set(lOwnersOf(L));lRender();}
 function lToggle(o){lSel.has(o)?lSel.delete(o):lSel.add(o);lRender();}
 function lToggleTier(t){lExpanded.has(t)?lExpanded.delete(t):lExpanded.add(t);lRender();}
@@ -281,9 +286,11 @@ function lDrillCol(k,isTier){const d=lFlt().filter(x=>isTier?x.t===k:x.r===k);co
 function lDrillGroup(g,k,isTier){const d=lFlt().filter(x=>x.g===g&&(isTier?x.t===k:x.r===k));const col=isTier?TIERCOL[k]:lColKey(k);const lb=isTier?lTierLbl(k):k;openLeadModal(`${g} \u00b7 <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lDrillGroupTot(g){const d=lFlt().filter(x=>x.g===g);openLeadModal(`${g} <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lDrillAll(){const d=lFlt();openLeadModal(`All leads in view <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
-function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
-  ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
-  renderTagBar(LEADS.filter(x=>lSel.has(x.o)));
+function lRender(){const B=lyBase();
+  const _sel=document.getElementById("lySel");if(_sel)_sel.innerHTML=LY_OPTS.map(o=>'<option value="'+o+'"'+(o===lLayout?' selected':'')+'>'+o+' ('+LEADS.filter(x=>lyOf(x)===o).length.toLocaleString()+')</option>').join("");
+  document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?B:B.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
+  ownerChips(lLayer==="All"?B:B.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
+  renderTagBar(B.filter(x=>lSel.has(x.o)));
   const d=lFlt();document.getElementById("pipe").innerHTML=pipeHTML(d,LGROUPS,LGCOL,LGDESC);
   document.getElementById("cards").innerHTML=tierCardsHTML(d,META.tiers,META.tierList);
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
