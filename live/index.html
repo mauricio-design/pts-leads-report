@@ -122,6 +122,18 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 </div>
 <div id="leadsView">
   <div class="tabs" id="tabs"></div><div class="ochips" id="owners"></div><div id="tagbar" style="margin:2px 0 6px"></div>
+  <div class="cr-ctrl" id="cqCtrl" style="display:none">
+    <span style="color:var(--mut);font-size:12px">&#128222; <b>Call Queue</b> &mdash; select AI-owned leads from any cell popup and send them to the calling funnel (Inbound MQL).</span>
+    <span style="flex:1"></span>
+    <button class="iav-btn" id="cqBtn" onclick="cqToggle()">&#128222; SEND TO CALL QUEUE</button>
+  </div>
+  <div class="iav-bar" id="cqBar">
+    <b id="cqCount">0 selected</b>
+    <span style="color:var(--mut);font-size:12px">Open any cell in the heatmap/tiers and tick leads. Selection persists across popups and cells.</span>
+    <span style="flex:1"></span>
+    <button class="iav-go" id="cqGo" onclick="cqStart()" disabled>Verify &amp; queue</button>
+    <button class="iav-cancel" onclick="cqToggle()">Cancel</button>
+  </div>
   <h2 class="sh">Lead Funnel</h2><div class="cards" id="pipe"></div>
   <h2 class="sh">Quality Tiers (by Bank Products)</h2><div class="cards" id="cards"></div>
   <h2 class="sh">Stage &#215; Rating Heatmap</h2><div class="insight" id="insight"></div><div id="heat"></div>
@@ -169,6 +181,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
 
 <div class="overlay" id="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="modalTitle"></b><span class="x" onclick="closeModal()">&#10005;</span></div><div class="modalbody" id="modalBody"></div></div></div>
 <div class="overlay" id="iavOverlay"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="iavTitle">&#129302; IA Verification</b><span class="x" onclick="iavClose()">&#10005;</span></div><div class="modalbody" id="iavBody"></div></div></div>
+<div class="overlay" id="cqOverlay"><div class="modal" onclick="event.stopPropagation()"><div class="modalhdr"><b id="cqTitle">&#128222; Call Queue</b><span class="x" onclick="cqClose()">&#10005;</span></div><div class="modalbody" id="cqBody"></div></div></div>
 </div>
 <script>
 let LEADS=[],DEALS=[];const LEADS_URL="https://n8n.pts-automation.cloud/webhook/report-leads-live",DEALS_URL="https://n8n.pts-automation.cloud/webhook/report-deals-live";
@@ -198,13 +211,13 @@ function heatHTML(data,GROUPS,STAGES,RATINGS,TIERS,drillFn,expanded,toggleFn,GCO
   const CG=collapsed||new Set();
   const colArg=(col)=>col.type==='r'?`'${col.c.r.replace(/'/g,"")}'`:`'${col.tier}',1`;
   const cellArg=(col,s)=>col.type==='r'?`'${s.replace(/'/g,"")}','${col.c.r.replace(/'/g,"")}'`:`'${s.replace(/'/g,"")}','${col.tier}',1`;
-  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' ▾':' ▸'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
-  h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings ▸</small></th>`).join("")+`</tr></thead><tbody>`;
+  let h=`<div class="hscroll"><table><thead><tr><th rowspan="2">Stage</th>`+tmeta.map(tm=>{const cl=tm.ratings.length>1;return `<th colspan="${tm.span}" class="${cl?'tierhdr':''}" style="color:${TIERCOL[tm.tier]}" ${cl?`onclick="${toggleFn}('${tm.tier}')" title="${tm.ex?'Click to collapse':'Click to expand'}"`:''}>${tlabel(tm.tier)}${cl?(tm.ex?' \u25be':' \u25b8'):''}</th>`;}).join("")+`<th rowspan="2">Row Total</th></tr>`;
+  h+=`<tr>`+cols.map(col=>col.type==='r'?`<th class="rcol"><span class=dot style="background:${TIERCOL[col.c.tier]}"></span>${col.c.short}${col.c.bp?`<small>${col.c.bp}</small>`:''}</th>`:`<th class="rcol tierhdr" style="color:${TIERCOL[col.tier]}" onclick="${toggleFn}('${col.tier}')" title="Click to expand">Total<small>${col.ratings.length} ratings \u25b8</small></th>`).join("")+`</tr></thead><tbody>`;
   for(const g of GROUPS){const isC=CG.has(g);
     if(!isC){for(const s of STAGES[g]){const rc=RATINGS.reduce((a,c)=>a+m[s][c.r],0);
-      h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">·</td>`;const t=0.15+0.85*Math.sqrt(v/max);const txt=t>0.8?'#0e1018':'#eaf0ff';return `<td class="cell" style="background:${heatColor(t)};color:${txt}" onclick="${drillFn}(${cellArg(col,s)})">${f(v)}</td>`;}).join("")+`<td class="rowtot cell" onclick="${drillFn}Stage('${s.replace(/'/g,"")}')" title="All ratings in this stage">${f(rc)}</td></tr>`;}}
-    const gd=data.filter(x=>x.g===g);const ind=isC?' ▸':' ▾';
-    h+=`<tr class="gtot"><td style="color:${(GCOL&&GCOL[g])||'#dce6ff'};border-left:3px solid ${(GCOL&&GCOL[g])||'#4f8cff'};cursor:pointer" ${groupToggleFn?`onclick="${groupToggleFn}('${g.replace(/'/g,"")}')" title="Click to collapse/expand this group"`:''}>${g} · Group Total${groupToggleFn?ind:''}</td>`+cols.map(col=>{const v=dv(col,gd);return v?`<td class="cell" onclick="${drillFn}Group('${g.replace(/'/g,"")}',${colArg(col)})">${f(v)}</td>`:`<td>·</td>`;}).join("")+`<td class="cell" onclick="${drillFn}GroupTot('${g.replace(/'/g,"")}')">${f(gd.length)}</td></tr>`;}
+      h+=`<tr><td>${s}</td>`+cols.map(col=>{const v=cv(col,m[s]);if(!v)return `<td class="cell z">\u00b7</td>`;const t=0.15+0.85*Math.sqrt(v/max);const txt=t>0.8?'#0e1018':'#eaf0ff';return `<td class="cell" style="background:${heatColor(t)};color:${txt}" onclick="${drillFn}(${cellArg(col,s)})">${f(v)}</td>`;}).join("")+`<td class="rowtot cell" onclick="${drillFn}Stage('${s.replace(/'/g,"")}')" title="All ratings in this stage">${f(rc)}</td></tr>`;}}
+    const gd=data.filter(x=>x.g===g);const ind=isC?' \u25b8':' \u25be';
+    h+=`<tr class="gtot"><td style="color:${(GCOL&&GCOL[g])||'#dce6ff'};border-left:3px solid ${(GCOL&&GCOL[g])||'#4f8cff'};cursor:pointer" ${groupToggleFn?`onclick="${groupToggleFn}('${g.replace(/'/g,"")}')" title="Click to collapse/expand this group"`:''}>${g} \u00b7 Group Total${groupToggleFn?ind:''}</td>`+cols.map(col=>{const v=dv(col,gd);return v?`<td class="cell" onclick="${drillFn}Group('${g.replace(/'/g,"")}',${colArg(col)})">${f(v)}</td>`:`<td>\u00b7</td>`;}).join("")+`<td class="cell" onclick="${drillFn}GroupTot('${g.replace(/'/g,"")}')">${f(gd.length)}</td></tr>`;}
   h+=`<tr class="tot"><td>Column Total</td>`+cols.map(col=>{const v=dv(col,data);return v?`<td class="cell" onclick="${drillFn}Col(${colArg(col)})">${f(v)}</td>`:`<td>${f(v)}</td>`;}).join("")+`<td class="cell" onclick="${drillFn}All()">${f(data.length)}</td></tr>`;
   return h+`</tbody></table></div>`;}
 function insightHTML(data,GROUPS,STAGES,RATINGS){const tot=data.length||1;const m={};for(const g of GROUPS)for(const s of STAGES[g]){m[s]={};for(const c of RATINGS)m[s][c.r]=0;}for(const x of data){if(m[x.s]&&m[x.s][x.r]!==undefined)m[x.s][x.r]++;}const cells=[];for(const g of GROUPS)for(const s of STAGES[g])for(const c of RATINGS){if(m[s][c.r])cells.push({s,r:c.r,v:m[s][c.r]});}cells.sort((a,b)=>b.v-a.v);const t=cells.slice(0,3).map(c=>`<b>${c.s} \u00d7 ${c.r} = ${(c.v/tot*100).toFixed(1)}%</b> (${c.v})`).join(", ");return t?`\ud83d\udc41\ufe0f <b>Where the eye lands:</b> the densest cells are ${t}.`:"No data in current selection.";}
@@ -244,8 +257,9 @@ function lSetLayer(L){lLayer=L;lSel=new Set(lOwnersOf(L));lRender();}
 function lToggle(o){lSel.has(o)?lSel.delete(o):lSel.add(o);lRender();}
 function lToggleTier(t){lExpanded.has(t)?lExpanded.delete(t):lExpanded.add(t);lRender();}
 function openLeadModal(title,d){document.getElementById("modalTitle").innerHTML=title;
-  let h=d.length?`<table class="dt"><thead><tr><th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th>Disq. Reason</th><th>Rating</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
-  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){h+=`<tr><td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>\u2014</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.dr?x.dr:'<span class=muted>\u2014</span>'}</td><td>${x.r}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  const ck=(typeof cqMode!=="undefined")&&cqMode&&lLayer==="AI";
+  let h=d.length?`<table class="dt"><thead><tr>${ck?'<th style="width:26px"><input type="checkbox" class="iav-ck" onclick="cqAllModal(this)" title="Select all in this popup"></th>':''}<th>Lead</th><th>Bank Products</th><th>Created</th><th>Stage</th><th>Disq. Reason</th><th>Rating</th><th># Notes</th><th>Last Activity</th><th>Funnel (days)</th><th>Owner</th></tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
+  if(d.length){d.sort((a,b)=>(fdays(b.cr)||0)-(fdays(a.cr)||0));for(const x of d){const ckc=ck?('<td>'+(x.id?'<input type="checkbox" class="iav-ck cq-rowck" data-id="'+x.id+'" data-n="'+crEsc(x.n)+'" data-s="'+crEsc(x.s)+'" '+(cqSel.has(''+x.id)?'checked':'')+' onclick="cqTick(this)">':'')+'</td>'):'';h+=`<tr>${ckc}<td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||'<span class=muted>\u2014</span>'}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.dr?x.dr:'<span class=muted>\u2014</span>'}</td><td>${x.r}</td><td>${x.nt||'0'}</td><td>${x.la}</td><td>${fdays(x.cr)==null?'':fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
 function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key==='NonICP'?'Non-ICP':key+' Tier'):key;openLeadModal(`${stage} \u00b7 <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lToggleTag(t){lTagSel.has(t)?lTagSel.delete(t):lTagSel.add(t);lRender();}
@@ -257,16 +271,16 @@ function clearTags(){lTagSel=new Set();lRender();}
 document.addEventListener('click',function(e){if(tagPanelOpen&&e.target&&!e.target.closest('.tagwrap'))closeTagPanel();});
 function renderTagBar(data){const c={};for(const x of data)for(const t of (x.tags||[]))c[t]=(c[t]||0)+1;const arr=Object.entries(c).sort((a,b)=>b[1]-a[1]);const box=document.getElementById('tagbar');if(!box)return;if(!arr.length){box.innerHTML='';return;}const sel=lTagSel;
   const opts=arr.map(([t,n])=>`<span class="ochip ${sel.has(t)?'on':'off'}" onclick="lToggleTag('${t.replace(/'/g,"\\'")}')"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b><span class="oc">${n.toLocaleString()}</span></span>`).join('');
-  const pills=[...sel].map(t=>`<span class="ochip on" style="cursor:pointer" onclick="lToggleTag('${t.replace(/'/g,"\\'")}')" title="Remove filter"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b> ✕</span>`).join('');
-  box.innerHTML=`<span class="lbl" style="margin-right:6px">Tags:</span><span class="tagwrap"><span class="tagbtn" onclick="toggleTagPanel(event)">🏷️ Filter by tags${sel.size?` <span class="cnt">${sel.size}</span>`:''} ▾</span><div class="tagpanel${tagPanelOpen?' open':''}" id="tagpanel"><div class="hd"><b>Select tags to filter</b><span class="act" onclick="clearTags()">Clear all</span></div><div class="opts">${opts}</div><div style="text-align:right;margin-top:10px"><span class="act" onclick="closeTagPanel()">Done ✓</span></div></div></span>${sel.size?`<span style="display:inline-flex;flex-wrap:wrap;gap:7px;margin-left:8px;vertical-align:middle">${pills}</span>`:''}`;
+  const pills=[...sel].map(t=>`<span class="ochip on" style="cursor:pointer" onclick="lToggleTag('${t.replace(/'/g,"\\'")}')" title="Remove filter"><span class="cdot" style="background:#a78bfa"></span><b>${t}</b> \u2715</span>`).join('');
+  box.innerHTML=`<span class="lbl" style="margin-right:6px">Tags:</span><span class="tagwrap"><span class="tagbtn" onclick="toggleTagPanel(event)">\ud83c\udff7\ufe0f Filter by tags${sel.size?` <span class="cnt">${sel.size}</span>`:''} \u25be</span><div class="tagpanel${tagPanelOpen?' open':''}" id="tagpanel"><div class="hd"><b>Select tags to filter</b><span class="act" onclick="clearTags()">Clear all</span></div><div class="opts">${opts}</div><div style="text-align:right;margin-top:10px"><span class="act" onclick="closeTagPanel()">Done \u2713</span></div></div></span>${sel.size?`<span style="display:inline-flex;flex-wrap:wrap;gap:7px;margin-left:8px;vertical-align:middle">${pills}</span>`:''}`;
 }
 function lTierLbl(k){return k==='None'?'No Rating':k==='Unknown'?'Unknown':k==='NonICP'?'Non-ICP':k+' Tier';}
 function lColKey(k){return TIERCOL[k]||TIERCOL[(META.ratings.find(c=>c.r===k)||{tier:'Unknown'}).tier];}
-function lDrillStage(st){const d=lFlt().filter(x=>x.s===st);openLeadModal(`${st} <span class="muted" style="font-weight:400">— all ratings · ${d.length} leads</span>`,d);}
-function lDrillCol(k,isTier){const d=lFlt().filter(x=>isTier?x.t===k:x.r===k);const col=isTier?TIERCOL[k]:lColKey(k);const lb=isTier?lTierLbl(k):k;openLeadModal(`All stages · <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
-function lDrillGroup(g,k,isTier){const d=lFlt().filter(x=>x.g===g&&(isTier?x.t===k:x.r===k));const col=isTier?TIERCOL[k]:lColKey(k);const lb=isTier?lTierLbl(k):k;openLeadModal(`${g} · <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
-function lDrillGroupTot(g){const d=lFlt().filter(x=>x.g===g);openLeadModal(`${g} <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
-function lDrillAll(){const d=lFlt();openLeadModal(`All leads in view <span class="muted" style="font-weight:400">— ${d.length} leads</span>`,d);}
+function lDrillStage(st){const d=lFlt().filter(x=>x.s===st);openLeadModal(`${st} <span class="muted" style="font-weight:400">\u2014 all ratings \u00b7 ${d.length} leads</span>`,d);}
+function lDrillCol(k,isTier){const d=lFlt().filter(x=>isTier?x.t===k:x.r===k);const col=isTier?TIERCOL[k]:lColKey(k);const lb=isTier?lTierLbl(k):k;openLeadModal(`All stages \u00b7 <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
+function lDrillGroup(g,k,isTier){const d=lFlt().filter(x=>x.g===g&&(isTier?x.t===k:x.r===k));const col=isTier?TIERCOL[k]:lColKey(k);const lb=isTier?lTierLbl(k):k;openLeadModal(`${g} \u00b7 <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
+function lDrillGroupTot(g){const d=lFlt().filter(x=>x.g===g);openLeadModal(`${g} <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
+function lDrillAll(){const d=lFlt();openLeadModal(`All leads in view <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl])=>`<div class="tab ${k===lLayer?'active':''}" onclick="lSetLayer('${k}')">${lbl}<span class="c">${(k==="All"?LEADS:LEADS.filter(x=>x.L===k)).length.toLocaleString()}</span></div>`).join("");
   ownerChips(lLayer==="All"?LEADS:LEADS.filter(x=>x.L===lLayer),lSel,"lToggle","owners");
   renderTagBar(LEADS.filter(x=>lSel.has(x.o)));
@@ -275,7 +289,9 @@ function lRender(){document.getElementById("tabs").innerHTML=LAYERS.map(([k,lbl]
   document.getElementById("insight").innerHTML=insightHTML(d,LGROUPS,LSTAGES,META.ratings);
   document.getElementById("heat").innerHTML=heatHTML(d,LGROUPS,LSTAGES,META.ratings,META.tiers,"lDrill",lExpanded,"lToggleTier",LGCOL,lGroupC,"lToggleGroup");
   document.getElementById("plan").innerHTML=lPlanHTML(d);document.getElementById("recycle").innerHTML=lRecycleHTML(d);
-  document.getElementById("notes").innerHTML=`<b>Leads \u2014 data notes.</b> Source: Zoho CRM (live). <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> \u2014 click a tier header (\u25b8) to expand it into its individual ratings. Click any cell <b>or any total</b> (row / tier / group / column) to open its leads. <b>Filter by Zoho tags</b> and <b>collapse stage groups</b> (click a Group Total row) above. Links to Zoho.`;}
+  document.getElementById("notes").innerHTML=`<b>Leads \u2014 data notes.</b> Source: Zoho CRM (live). <b>Funnel (days)</b> recalculates live. Everything reacts to the owner toggles. <b>Tiers start collapsed</b> \u2014 click a tier header (\u25b8) to expand it into its individual ratings. Click any cell <b>or any total</b> (row / tier / group / column) to open its leads. <b>Filter by Zoho tags</b> and <b>collapse stage groups</b> (click a Group Total row) above. Links to Zoho.`;
+  const _cq=document.getElementById("cqCtrl");if(_cq)_cq.style.display=(lLayer==="AI")?"flex":"none";
+  if(lLayer!=="AI"&&typeof cqMode!=="undefined"&&cqMode){cqMode=false;cqSel=new Map();document.getElementById("cqBar").style.display="none";document.getElementById("cqBtn").classList.remove("on");}}
 
 // ===== DEALS =====
 const DGROUPS=["Open / In Progress","Won","Lost"];const DSTAGES={"Open / In Progress":META.dopen,"Won":META.dwon,"Lost":META.dlost};
@@ -294,11 +310,11 @@ function dDrill(stage,key,isTier){const d=dFlt().filter(x=>x.s===stage&&(isTier?
 function dToggleGroup(g){dGroupC.has(g)?dGroupC.delete(g):dGroupC.add(g);dRender();}
 function dTierLbl(k){return k==='None'?'No Rating':k==='NonICP'?'Non-ICP':k+' Tier';}
 function dColKey(k){return TIERCOL[k]||TIERCOL[(META.dratings.find(c=>c.r===k)||{tier:'None'}).tier];}
-function dDrillStage(st){const d=dFlt().filter(x=>x.s===st);openDealModal(`${st} <span class="muted" style="font-weight:400">— all ratings · ${d.length} deals</span>`,d);}
-function dDrillCol(k,isTier){const d=dFlt().filter(x=>isTier?x.t===k:x.r===k);const col=isTier?TIERCOL[k]:dColKey(k);const lb=isTier?dTierLbl(k):k;openDealModal(`All stages · <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">— ${d.length} deals</span>`,d);}
-function dDrillGroup(g,k,isTier){const d=dFlt().filter(x=>x.g===g&&(isTier?x.t===k:x.r===k));const col=isTier?TIERCOL[k]:dColKey(k);const lb=isTier?dTierLbl(k):k;openDealModal(`${g} · <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">— ${d.length} deals</span>`,d);}
-function dDrillGroupTot(g){const d=dFlt().filter(x=>x.g===g);openDealModal(`${g} <span class="muted" style="font-weight:400">— ${d.length} deals</span>`,d);}
-function dDrillAll(){const d=dFlt();openDealModal(`All deals in view <span class="muted" style="font-weight:400">— ${d.length} deals</span>`,d);}
+function dDrillStage(st){const d=dFlt().filter(x=>x.s===st);openDealModal(`${st} <span class="muted" style="font-weight:400">\u2014 all ratings \u00b7 ${d.length} deals</span>`,d);}
+function dDrillCol(k,isTier){const d=dFlt().filter(x=>isTier?x.t===k:x.r===k);const col=isTier?TIERCOL[k]:dColKey(k);const lb=isTier?dTierLbl(k):k;openDealModal(`All stages \u00b7 <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} deals</span>`,d);}
+function dDrillGroup(g,k,isTier){const d=dFlt().filter(x=>x.g===g&&(isTier?x.t===k:x.r===k));const col=isTier?TIERCOL[k]:dColKey(k);const lb=isTier?dTierLbl(k):k;openDealModal(`${g} \u00b7 <span style="color:${col}">${lb}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} deals</span>`,d);}
+function dDrillGroupTot(g){const d=dFlt().filter(x=>x.g===g);openDealModal(`${g} <span class="muted" style="font-weight:400">\u2014 ${d.length} deals</span>`,d);}
+function dDrillAll(){const d=dFlt();openDealModal(`All deals in view <span class="muted" style="font-weight:400">\u2014 ${d.length} deals</span>`,d);}
 function dRender(){ownerChips(DEALS,dSel,"dToggle","downers");const d=dFlt();
   document.getElementById("dpipe").innerHTML=pipeHTML(d,DGROUPS,DGCOL,DGDESC);
   document.getElementById("dcards").innerHTML=tierCardsHTML(d,META.dtiers,META.dtierList);
@@ -465,6 +481,109 @@ async function iavApprove(){
   },5000);
 }
 function iavFinish(){iavClose();iavMode=false;iavSel=new Set();document.getElementById('iavBar').style.display='none';document.getElementById('iavBtn').classList.remove('on');CR_LOADED=false;loadCalls(true);}
+
+// ===== CALL QUEUE (send AI-owned leads to Inbound MQL via n8n) =====
+const CQ_TOKEN='pts-cq-2026';
+const CQ_VERIFY='https://n8n.pts-automation.cloud/webhook/call-queue-verify';
+const CQ_SEND='https://n8n.pts-automation.cloud/webhook/call-queue-send';
+let cqMode=false,cqSel=new Map(),cqJob=null,cqPoll=null,cqRows=[];
+function cqToggle(){cqMode=!cqMode;cqSel=new Map();document.getElementById('cqBar').style.display=cqMode?'flex':'none';document.getElementById('cqBtn').classList.toggle('on',cqMode);cqCount();}
+function cqCount(){const n=cqSel.size;document.getElementById('cqCount').textContent=n.toLocaleString()+' selected';document.getElementById('cqGo').disabled=!n;}
+function cqTick(el){const id=''+el.dataset.id;if(el.checked)cqSel.set(id,{n:el.dataset.n,s:el.dataset.s});else cqSel.delete(id);cqCount();}
+function cqAllModal(el){document.querySelectorAll('#modalBody .cq-rowck').forEach(c=>{c.checked=el.checked;const id=''+c.dataset.id;if(el.checked)cqSel.set(id,{n:c.dataset.n,s:c.dataset.s});else cqSel.delete(id);});cqCount();}
+function cqOpen(html){document.getElementById('cqBody').innerHTML=html;document.getElementById('cqOverlay').style.display='flex';}
+function cqClose(){if(cqPoll){clearInterval(cqPoll);cqPoll=null;}document.getElementById('cqOverlay').style.display='none';}
+async function cqLogRows(phase){try{const r=await fetch(SUPA_URL+'/rest/v1/ia_verification_log?job_id=eq.'+cqJob+'&phase=eq.'+phase+'&select=id,lead_id,lead_name,status,detail&order=id&limit=5000',{headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON}});return r.ok?await r.json():[];}catch(e){return [];}}
+function cqBadge(s){const M={ready:['READY TO QUEUE','#22c55e'],already_called:['ALREADY CALLED','#eab308'],not_owner:['NOT AI-OWNED','#a855f7'],error:['ERROR','#ef4444'],moved:['SENT','#22c55e'],move_error:['ERROR','#ef4444']};const a=M[s]||[s,'#64748b'];return '<span class="iav-badge" style="background:'+a[1]+'22;color:'+a[1]+'">'+a[0]+'</span>';}
+async function cqStart(){
+  const sel=[...cqSel.entries()];
+  if(!sel.length)return;
+  cqJob='cq-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);
+  const total=sel.length,CH=50;
+  const leads=sel.map(function(e,i){return {lead_id:e[0],idx:i};});
+  cqOpen('<div class="iav-step"><b>Step 1 of 3 &mdash; Verifying '+total+' lead(s)</b><div style="color:var(--mut);font-size:12.5px;margin-top:6px">For each lead the AI reads its Zoho notes and checks whether <b>WE already called them</b> (Atlas call notes). Already-called leads are reported so you can re-process them with IA VERIFICATION in Call Results; the rest can be queued. Processed one by one, in batches of '+CH+'.</div><div id="cqP1">'+iavPBar(2,'Sending first batch...')+'</div></div>');
+  await iavPost(CQ_VERIFY,{token:CQ_TOKEN,job_id:cqJob,total:total,leads:leads.slice(0,CH)});
+  let sent=Math.min(CH,total),busy=false,lastDone=-1,stall=0;
+  cqPoll=setInterval(async function(){
+    if(busy)return;busy=true;
+    try{
+      const rows=(await cqLogRows('cq_verify')).filter(r=>r.status!=='job_done');
+      const done=rows.length;
+      if(done===lastDone)stall++;else{stall=0;lastDone=done;}
+      const p=document.getElementById('cqP1');
+      if(p)p.innerHTML=iavPBar(Math.max(2,Math.round(done/total*100)),done+' / '+total+' verified'+(stall>40?' &middot; <span style="color:#eab308">slower than usual, still working...</span>':''));
+      if(done>=sent&&sent<total){const nx=leads.slice(sent,sent+CH);await iavPost(CQ_VERIFY,{token:CQ_TOKEN,job_id:cqJob,total:total,leads:nx});sent+=nx.length;}
+      if(done>=total){clearInterval(cqPoll);cqPoll=null;cqRows=rows;cqReport();}
+      if(stall>120){clearInterval(cqPoll);cqPoll=null;cqRows=rows;cqReport('Some leads did not report back ('+done+' of '+total+'). Showing what completed.');}
+    }finally{busy=false;}
+  },3000);
+}
+function cqReport(warn){
+  const rows=cqRows;const by={};for(const r of rows){(by[r.status]=by[r.status]||[]).push(r);}
+  const ready=by['ready']||[];const ac=by['already_called']||[];
+  let h='<div class="iav-step"><b>Step 2 of 3 &mdash; Verification report</b>';
+  if(warn)h+='<div style="background:rgba(234,179,8,.12);border:1px solid #eab308;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#eab308">'+warn+'</div>';
+  if(ac.length){
+    h+='<div class="iav-sec">'+cqBadge('already_called')+' &nbsp;'+ac.length+' lead(s) <span style="font-weight:400">&mdash; WE already called these. Do NOT queue them here: go to the <b>Call Results</b> tab and run them through the <b>&#129302; IA VERIFICATION</b> button so their call cycle continues from where it stopped.</span></div>';
+    h+='<div class="hscroll" style="max-height:220px;overflow-y:auto"><table class="iav-tbl"><thead><tr><th>Lead</th><th>Our calls</th><th>Last outcome</th><th>Last call</th><th>Zoho status</th></tr></thead><tbody>';
+    for(const r of ac){const d=r.detail||{};h+='<tr><td>'+iavLeadLink(r)+'</td><td>'+(d.n_calls!=null?d.n_calls:'-')+'</td><td>'+crEsc(d.last_outcome||'-')+'</td><td>'+crEsc((''+(d.last_at||'')).slice(0,10))+'</td><td>'+crEsc(d.zoho_status||'-')+'</td></tr>';}
+    h+='</tbody></table></div>';
+  }
+  const OTH=[['not_owner','Not owned by Mauricio Esparza &mdash; the funnel would route them to Eric, not to AI calling. Skipped.'],['error','Could not be verified &mdash; check the lead in Zoho.']];
+  for(const g of OTH){
+    const arr=by[g[0]];if(!arr||!arr.length)continue;
+    h+='<div class="iav-sec">'+cqBadge(g[0])+' &nbsp;'+arr.length+' lead(s) <span style="font-weight:400">&mdash; '+g[1]+'</span></div>';
+    h+='<div class="hscroll" style="max-height:160px;overflow-y:auto"><table class="iav-tbl"><thead><tr><th>Lead</th><th>Zoho status / reason</th></tr></thead><tbody>';
+    for(const r of arr){const d=r.detail||{};h+='<tr><td>'+iavLeadLink(r)+'</td><td>'+crEsc(d.zoho_status||d.reason||'-')+'</td></tr>';}
+    h+='</tbody></table></div>';
+  }
+  h+='<div class="iav-sec" style="margin-top:18px">'+cqBadge('ready')+' &nbsp;'+ready.length+' lead(s) <span style="font-weight:400">&mdash; never called by us. Ready to be sent to the calling funnel (staggered 5 every 2 minutes).</span></div>';
+  h+='</div><div class="iav-foot"><button class="iav-cancel" onclick="cqClose()">Close</button>'+(ready.length?'<button class="iav-go" onclick="cqSendView()">Next: queue '+ready.length+' lead(s) &rsaquo;</button>':'')+'</div>';
+  cqOpen(h);
+}
+function cqSendView(){
+  const ready=cqRows.filter(r=>r.status==='ready');
+  let h='<div class="iav-step"><b>Step 3 of 3 &mdash; Confirm &amp; send to the call queue</b><div style="color:var(--mut);font-size:12.5px;margin:6px 0 10px">Each checked lead is moved to <b>Inbound MQL</b> staggered <b>5 every 2 minutes</b> (bounce via Buying Window Closed so the Zoho automation always fires): Zoho &rarr; Clay enrichment &rarr; Mauricio-owned leads reach <b>Reaching</b> and Atlas calls them. Leads whose current Zoho status looks sensitive (Booked, Replied, Disqualified...) come <b>unchecked</b> &mdash; you have the final say.</div>';
+  h+='<div class="hscroll" style="max-height:320px;overflow-y:auto"><table class="iav-tbl"><thead><tr><th><input type="checkbox" class="iav-ck" checked onclick="cqApprAll(this)" title="Toggle all"></th><th>Lead</th><th>Zoho status</th></tr></thead><tbody>';
+  ready.forEach(function(r,i){const d=r.detail||{};const ok=!d.warn;
+    h+='<tr><td><input type="checkbox" class="iav-ck cq-appr" data-i="'+i+'" '+(ok?'checked':'')+' onclick="cqApprCount()"></td><td>'+iavLeadLink(r)+'</td><td><span style="color:'+(ok?'#22c55e':'#ef4444')+';font-weight:600">'+crEsc(d.zoho_status||'?')+(ok?'':' &middot; review')+'</span></td></tr>';});
+  h+='</tbody></table></div>';
+  h+='<div style="margin:12px 0 0"><div style="font-size:12.5px;color:var(--mut)">&#128231; Notification email (optional) &mdash; receive a nicely formatted summary when <b>ALL</b> leads have been queued:</div><input class="cr-search" id="cqEmail" placeholder="name@company.com" style="margin-top:6px;max-width:340px"><div id="cqEmailWarn" style="color:#ef4444;font-size:12px;margin-top:4px"></div></div>';
+  h+='</div><div class="iav-foot"><button class="iav-cancel" onclick="cqReport()">&lsaquo; Back</button><button class="iav-go" id="cqGoBtn" onclick="cqSend()">Send <span id="cqApprN">0</span> to Inbound MQL</button></div>';
+  cqOpen(h);cqApprCount();
+}
+function cqApprAll(el){document.querySelectorAll('.cq-appr').forEach(c=>{c.checked=el.checked;});cqApprCount();}
+function cqApprCount(){const n=document.querySelectorAll('.cq-appr:checked').length;const s=document.getElementById('cqApprN');if(s)s.textContent=n;const g=document.getElementById('cqGoBtn');if(g)g.disabled=!n;}
+async function cqSend(){
+  const ready=cqRows.filter(r=>r.status==='ready');
+  const picked=[...document.querySelectorAll('.cq-appr:checked')].map(c=>ready[Number(c.dataset.i)]).filter(Boolean);
+  if(!picked.length)return;
+  const email=(document.getElementById('cqEmail').value||'').trim();
+  if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){document.getElementById('cqEmailWarn').textContent='Invalid email - fix it or leave it empty.';return;}
+  const counts={selected:cqRows.length,already_called:cqRows.filter(r=>r.status==='already_called').length,ready:ready.length};
+  const leads=picked.map(function(r){return {lead_id:r.lead_id,lead_name:r.lead_name||''};});
+  const batches=Math.ceil(leads.length/5);
+  cqOpen('<div class="iav-step"><b>Sending '+leads.length+' lead(s) to Inbound MQL &mdash; staggered</b><div style="color:var(--mut);font-size:12.5px;margin-top:6px">n8n moves them in batches of <b>5 every 2 minutes</b> (bounce: Buying Window Closed &rarr; Inbound MQL) so Clay and Atlas never get saturated. Estimated time: ~'+(batches*2)+' min. You can close this window &mdash; everything runs in n8n'+(email?' and a summary email goes to <b>'+crEsc(email)+'</b> when ALL are done':'')+'.</div><div id="cqP2">'+iavPBar(3,'Starting...')+'</div><div id="cqDoneBox"></div></div>');
+  await iavPost(CQ_SEND,{token:CQ_TOKEN,job_id:cqJob,notify_email:email,summary:counts,leads:leads});
+  const total=leads.length;let busy=false;
+  cqPoll=setInterval(async function(){
+    if(busy)return;busy=true;
+    try{
+      const rows=await cqLogRows('cq_send');
+      const moved=rows.filter(r=>r.status==='moved').length;
+      const merr=rows.filter(r=>r.status==='move_error').length;
+      const done=rows.find(r=>r.status==='job_done');
+      const p=document.getElementById('cqP2');
+      if(!done){if(p)p.innerHTML=iavPBar(Math.max(3,Math.round((moved+merr)/total*100)),(moved+merr)+' / '+total+' moved &middot; next batch fires within 2 min...');}
+      else{clearInterval(cqPoll);cqPoll=null;const d=done.detail||{};
+        if(p)p.innerHTML=iavPBar(100,'Done');
+        const errRows=rows.filter(r=>r.status==='move_error');
+        document.getElementById('cqDoneBox').innerHTML='<div style="background:rgba(34,197,94,.1);border:1px solid #22c55e;border-radius:12px;padding:16px;margin-top:12px"><b style="color:#22c55e">&#9989; All queued!</b><div style="margin-top:6px;font-size:13px;line-height:1.6"><b>'+(d.moved||0)+'</b> lead(s) sent to <b>Inbound MQL</b>'+((d.errors||0)?' &middot; <b style="color:#ef4444">'+d.errors+' error(s)</b>':'')+'.<br>Zoho fires the funnel &rarr; Clay enriches &rarr; Mauricio-owned leads move to Reaching and Atlas calls them automatically.'+(email?'<br>&#128231; Summary email sent to <b>'+crEsc(email)+'</b>.':'')+'</div>'+(errRows.length?'<div style="color:var(--mut);font-size:12px;margin-top:6px">Errors: '+errRows.map(r=>crEsc(r.lead_name||r.lead_id)).join(', ')+'</div>':'')+'<div class="iav-foot" style="border:none;padding:14px 0 0"><button class="iav-go" onclick="cqFinish()">Close</button></div></div>';}
+    }finally{busy=false;}
+  },5000);
+}
+function cqFinish(){cqClose();cqMode=false;cqSel=new Map();document.getElementById('cqBar').style.display='none';document.getElementById('cqBtn').classList.remove('on');}
+
 
 async function load(){const sub=document.getElementById("sub");try{sub.textContent="\u23f3 Loading live data from Zoho\u2026";const[lr,dr]=await Promise.all([fetch(SUPA_URL+"/rest/v1/report_cache?key=eq.leads&select=payload,updated_at",{headers:{apikey:SUPA_ANON,Authorization:"Bearer "+SUPA_ANON}}).then(r=>r.json()),fetch(DEALS_URL).then(r=>r.json())]);LEADS=(lr[0]&&lr[0].payload&&lr[0].payload.leads)||[];DEALS=dr.deals||[];lSel=new Set(lOwnersOf("All"));dSel=new Set(DEALS.map(x=>x.o));const _upd=(lr[0]&&lr[0].updated_at)?new Date(lr[0].updated_at).toLocaleString():new Date().toLocaleString();sub.textContent=LEADS.length.toLocaleString()+" leads \u00b7 "+DEALS.length.toLocaleString()+" deals \u00b7 LIVE (Zoho, auto-sync ~10 min) \u00b7 updated "+_upd;lRender();dRender();}catch(e){sub.textContent="\u26a0\ufe0f Error loading live data: "+e;}}load();setInterval(load,300000);setInterval(function(){if(CR_LOADED&&document.getElementById("callsView").style.display!=="none"){CR_LOADED=false;loadCalls(true);}},300000);
 </script></body></html>
