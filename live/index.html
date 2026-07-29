@@ -388,8 +388,8 @@ function crBuild(reqs,res){
   CR_LEADS=Object.values(CR_L);
   for(const o of CR_LEADS){const cns=Object.keys(o.cn).map(Number);o.max=cns.length?Math.max.apply(null,cns):0;
     const dc=cns.filter(cn=>o.cn[cn].det);o.maxDone=dc.length?Math.max.apply(null,dc):0;o.frontier=o.maxDone+1;
-    const lastoc=o.maxDone?o.cn[o.maxDone].oc:null;o.lastoc=lastoc;const nx=o.cn[o.frontier];const nxd=nx?(''+(nx.done||'')).toUpperCase():'';o.nxLive=!!(nx&&nx.req&&(nx.done==null||nxd.indexOf('WAITING')>=0));o.nxCancel=!!(nx&&nx.req&&(nxd.indexOf('CANCELLED')>=0||nxd.indexOf('NO PHONE')>=0));o.hasNext=o.nxLive;
-    let st;if(o.maxDone>=10)st='cn10';else if(o.nxLive)st='encurso';else if(o.nxCancel)st='terminal';else if(CR_TERMINAL.has(lastoc))st='terminal';else if(CR_RETRY.has(lastoc)||(lastoc==null&&o.maxDone>0))st='estancado';else st='encurso';
+    const lastoc=o.maxDone?o.cn[o.maxDone].oc:null;o.lastoc=lastoc;const nx=o.cn[o.frontier];const nxd=nx?(''+(nx.done||'')).toUpperCase():'';o.nxLive=!!(nx&&nx.req&&(nx.done==null||nxd.indexOf('WAITING')>=0||(nxd==='YES'&&nx.fu&&Date.parse(nx.fu)>Date.now())));o.nxCancel=!!(nx&&nx.req&&(nxd.indexOf('CANCELLED')>=0||nxd.indexOf('NO PHONE')>=0));o.hasNext=o.nxLive;
+    let st;if(o.maxDone>=10)st='cn10';else if(o.nxLive)st='encurso';else if(o.nxCancel)st='terminal';else if(CR_TERMINAL.has(lastoc))st='terminal';else st='estancado';
     o.st=st;o.lastdt=Math.max.apply(null,[0].concat(Object.values(o.cn).map(c=>c.dt?Date.parse(c.dt)||0:0)));}
   crKpisRender();crFunnelRender();crRender();
 }
@@ -408,7 +408,7 @@ function crRender(){document.getElementById('crHead').innerHTML=(iavMode?'<th st
   document.getElementById('crPgbar').innerHTML='<button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage=1;crRender()">\u00ab</button><button class="cr-pgbtn" '+(crPage<=1?'disabled':'')+' onclick="crPage--;crRender()">\u2039 Prev</button><span class="cr-pginfo">Page '+crPage+' / '+M+'</span><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage++;crRender()">Next \u203a</button><button class="cr-pgbtn" '+(crPage>=M?'disabled':'')+' onclick="crPage='+M+';crRender()">\u00bb</button>';
   let h='';for(const o of shown){let cells='';for(let cn=1;cn<=10;cn++){const c=o.cn[cn];
     if(c&&c.det){const _oc=c.oc,_bg=_oc?(CR_OCOL[_oc]||'#3a3f52'):'#3a3f52',_lb=_oc?crEsc(CR_OSHORT[_oc]||_oc):'?';cells+='<td><span class="cr-oc" style="background:'+_bg+'" onclick="crDetail(\''+o.key+'\','+cn+')" title="'+(_oc?'':'Called - not classified yet')+'">'+_lb+'</span></td>';}
-    else if(c&&c.req){const du=(''+(c.done||'')).toUpperCase();if(du.indexOf('WAITING')>=0||c.done==null)cells+='<td><span class="cr-oc sched" title="Next call scheduled - the run exists">SCHED</span></td>';else if(du.indexOf('CANCELLED')>=0||du.indexOf('NO PHONE')>=0)cells+='<td><span class="cr-oc" style="background:#2a3147;color:#94a0c0" title="Next call cancelled">CANCEL</span></td>';else cells+='<td><span class="cr-oc" style="background:#3a3f52;color:#cdd5ec">&middot;</span></td>';}
+    else if(c&&c.req){const du=(''+(c.done||'')).toUpperCase();if(du.indexOf('WAITING')>=0||c.done==null||(du==='YES'&&c.fu&&Date.parse(c.fu)>Date.now()))cells+='<td><span class="cr-oc sched" title="Next call scheduled - the run exists">SCHED</span></td>';else if(du.indexOf('CANCELLED')>=0||du.indexOf('NO PHONE')>=0)cells+='<td><span class="cr-oc" style="background:#2a3147;color:#94a0c0" title="Next call cancelled">CANCEL</span></td>';else cells+='<td><span class="cr-oc" style="background:#3a3f52;color:#cdd5ec">&middot;</span></td>';}
     else if(cn===o.frontier&&o.st==='estancado'){cells+='<td><span class="cr-oc stuck" title="No next-call run - stranded">STUCK</span></td>';}
     else cells+='<td><span class="cr-oc empty">&middot;</span></td>';}
     const sl=CR_STLAB[o.st]||['','#94a0c0'];
