@@ -130,7 +130,7 @@ thead tr:first-child th:first-child{text-align:left;position:sticky;left:0;backg
   </div>
   <div class="iav-bar" id="cqBar">
     <b id="cqCount">0 selected</b>
-    <span style="color:var(--mut);font-size:12px">Open any cell in the heatmap/tiers and tick leads. Selection persists across popups and cells.</span>
+    <span style="color:var(--mut);font-size:12px">Open any cell in the heatmap/tiers and tick leads. <b>Shift + click</b> selects a whole range. Selection persists across popups and cells.</span>
     <span style="flex:1"></span>
     <button class="iav-go" id="cqGo" onclick="cqStart()" disabled>Verify &amp; queue</button>
     <button class="iav-cancel" onclick="cqToggle()">Cancel</button>
@@ -281,11 +281,11 @@ let _mdl={d:[],title:"",ck:false,ci:2,dir:1};
 const MDL_COLS=[{k:"n",lb:"Lead",num:0},{k:"bp",lb:"Bank Products",num:1},{k:"cr",lb:"Created",num:0},{k:"s",lb:"Stage",num:0},{k:"dr",lb:"Disq. Reason",num:0},{k:"r",lb:"Rating",num:0},{k:"nt",lb:"# Notes",num:1},{k:"la",lb:"Last Activity",num:0},{k:"fd",lb:"Funnel (days)",num:1},{k:"o",lb:"Owner",num:0}];
 function mdlVal(x,c){if(c.k==="fd"){const v=fdays(x.cr);return v==null?NaN:v;}if(c.num)return parseFloat(x[c.k]);return x[c.k]||"";}
 function mdlSortBy(i){if(_mdl.ci===i)_mdl.dir=-_mdl.dir;else{_mdl.ci=i;_mdl.dir=1;}mdlRender();}
-function openLeadModal(title,d){_mdl={d:d.slice(),title:title,ck:(typeof cqMode!=="undefined")&&cqMode&&lLayer==="AI",ci:2,dir:1};mdlRender();}
+function openLeadModal(title,d){if(typeof cqAnchor!=="undefined")cqAnchor=null;_mdl={d:d.slice(),title:title,ck:(typeof cqMode!=="undefined")&&cqMode&&lLayer==="AI",ci:2,dir:1};mdlRender();}
 function mdlRender(){document.getElementById("modalTitle").innerHTML=_mdl.title;const ck=_mdl.ck;const d=_mdl.d;const c=MDL_COLS[_mdl.ci];
   d.sort(function(a,b){let va=mdlVal(a,c),vb=mdlVal(b,c);if(c.num||c.k==="fd"){va=isNaN(va)?-Infinity:va;vb=isNaN(vb)?-Infinity:vb;return (va-vb)*_mdl.dir;}return String(va).localeCompare(String(vb))*_mdl.dir;});
-  let h=d.length?`<table class="dt"><thead><tr>${ck?'<th style="width:26px"><input type="checkbox" class="iav-ck" onclick="cqAllModal(this)" title="Select all in this popup"></th>':''}`+MDL_COLS.map((cc,i)=>`<th style="cursor:pointer;white-space:nowrap" onclick="mdlSortBy(${i})" title="Click to sort">${cc.lb}${i===_mdl.ci?(_mdl.dir>0?" \u25b2":" \u25bc"):""}</th>`).join("")+`</tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
-  if(d.length){for(const x of d){const ckc=ck?("<td>"+(x.id?'<input type="checkbox" class="iav-ck cq-rowck" data-id="'+x.id+'" data-n="'+crEsc(x.n)+'" data-s="'+crEsc(x.s)+'" '+(cqSel.has(""+x.id)?"checked":"")+' onclick="cqTick(this)">':"")+"</td>"):"";h+=`<tr>${ckc}<td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||"<span class=muted>\u2014</span>"}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.dr?x.dr:"<span class=muted>\u2014</span>"}</td><td>${x.r}</td><td>${x.nt||"0"}</td><td>${x.la}</td><td>${fdays(x.cr)==null?"":fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
+  let h=d.length?`${ck?`<div style="color:var(--mut);font-size:12px;margin:0 0 8px">Tip: tick one lead, then <b>Shift + click</b> another one to select every lead in between. The header checkbox selects all ${d.length} in this popup.</div>`:''}<table class="dt"><thead><tr>${ck?'<th style="width:26px"><input type="checkbox" class="iav-ck" onclick="cqAllModal(this)" title="Select all in this popup"></th>':''}`+MDL_COLS.map((cc,i)=>`<th style="cursor:pointer;white-space:nowrap" onclick="mdlSortBy(${i})" title="Click to sort">${cc.lb}${i===_mdl.ci?(_mdl.dir>0?" \u25b2":" \u25bc"):""}</th>`).join("")+`</tr></thead><tbody>`:`<div class="empty">No leads.</div>`;
+  if(d.length){for(const x of d){const ckc=ck?("<td>"+(x.id?'<input type="checkbox" class="iav-ck cq-rowck" data-id="'+x.id+'" data-n="'+crEsc(x.n)+'" data-s="'+crEsc(x.s)+'" '+(cqSel.has(""+x.id)?"checked":"")+' onclick="cqTick(this,event)" onmousedown="if(event.shiftKey)event.preventDefault()">':"")+"</td>"):"";h+=`<tr>${ckc}<td><a href="https://crm.zoho.com/crm/${META.org}/tab/Leads/${x.id}" target="_blank">${x.n}</a></td><td>${x.bp||"<span class=muted>\u2014</span>"}</td><td>${x.cr}</td><td>${x.s}</td><td>${x.dr?x.dr:"<span class=muted>\u2014</span>"}</td><td>${x.r}</td><td>${x.nt||"0"}</td><td>${x.la}</td><td>${fdays(x.cr)==null?"":fdays(x.cr)}</td><td>${x.o}</td></tr>`;}h+=`</tbody></table>`;}
   document.getElementById("modalBody").innerHTML=h;document.getElementById("overlay").style.display="flex";}
 function lDrill(stage,key,isTier){const d=lFlt().filter(x=>x.s===stage&&(isTier?x.t===key:x.r===key));const col=isTier?TIERCOL[key]:TIERCOL[(META.ratings.find(c=>c.r===key)||{tier:'Unknown'}).tier];const label=isTier?(key==='None'?'No Rating':key==='Unknown'?'Unknown':key==='NonICP'?'Non-ICP':key+' Tier'):key;openLeadModal(`${stage} \u00b7 <span style="color:${col}">${label}</span> <span class="muted" style="font-weight:400">\u2014 ${d.length} leads</span>`,d);}
 function lToggleTag(t){lTagSel.has(t)?lTagSel.delete(t):lTagSel.add(t);lRender();}
@@ -440,7 +440,7 @@ function iavLeadLink(r){return r.lead_id?'<a href="https://crm.zoho.com/crm/org5
 function iavBadge(s){const M={completed:['COMPLETED (10+)','#22c55e'],terminal:['STOP OUTCOME','#a855f7'],continue:['CONTINUE','#4f8cff'],already_scheduled:['ALREADY SCHEDULED','#7fb4ff'],skip:['NO CALLS FOUND','#64748b'],error:['ERROR','#ef4444']};const a=M[s]||[s,'#64748b'];return '<span class="iav-badge" style="background:'+a[1]+'22;color:'+a[1]+'">'+a[0]+'</span>';}
 async function iavPost(url,body){try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return r.ok;}catch(e){return false;}}
 async function iavStart(){
-  const sel=[...iavSel].map(k=>CR_L[k]).filter(o=>o&&o.id);
+  const sel=[...iavSel].map(k=>CR_L[k]).filter(o=>o&&o.id&&/^[0-9]{8,}$/.test(''+o.id));
   if(!sel.length)return;
   iavJob='iav-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);
   const total=sel.length,CH=50;
@@ -518,17 +518,23 @@ function iavFinish(){iavClose();iavMode=false;iavSel=new Set();document.getEleme
 const CQ_TOKEN='pts-cq-2026';
 const CQ_VERIFY='https://n8n.pts-automation.cloud/webhook/call-queue-verify';
 const CQ_SEND='https://n8n.pts-automation.cloud/webhook/call-queue-send';
-let cqMode=false,cqSel=new Map(),cqJob=null,cqPoll=null,cqRows=[];
-function cqToggle(){cqMode=!cqMode;cqSel=new Map();document.getElementById('cqBar').style.display=cqMode?'flex':'none';document.getElementById('cqBtn').classList.toggle('on',cqMode);cqCount();}
+let cqMode=false,cqSel=new Map(),cqJob=null,cqPoll=null,cqRows=[],cqAnchor=null;
+function cqToggle(){cqMode=!cqMode;cqSel=new Map();cqAnchor=null;document.getElementById('cqBar').style.display=cqMode?'flex':'none';document.getElementById('cqBtn').classList.toggle('on',cqMode);cqCount();}
 function cqCount(){const n=cqSel.size;document.getElementById('cqCount').textContent=n.toLocaleString()+' selected';document.getElementById('cqGo').disabled=!n;}
-function cqTick(el){const id=''+el.dataset.id;if(el.checked)cqSel.set(id,{n:el.dataset.n,s:el.dataset.s});else cqSel.delete(id);cqCount();}
-function cqAllModal(el){document.querySelectorAll('#modalBody .cq-rowck').forEach(c=>{c.checked=el.checked;const id=''+c.dataset.id;if(el.checked)cqSel.set(id,{n:c.dataset.n,s:c.dataset.s});else cqSel.delete(id);});cqCount();}
+function cqPut(c,on){const id=''+c.dataset.id;if(on)cqSel.set(id,{n:c.dataset.n,s:c.dataset.s});else cqSel.delete(id);}
+function cqTick(el,ev){const id=''+el.dataset.id;const all=[].slice.call(document.querySelectorAll('#modalBody .cq-rowck'));const i=all.indexOf(el);
+  if(ev&&ev.shiftKey&&cqAnchor!==null&&i>=0){let j=-1;for(let k=0;k<all.length;k++){if((''+all[k].dataset.id)===cqAnchor){j=k;break;}}
+    if(j>=0&&j!==i){const a=Math.min(i,j),b=Math.max(i,j),on=el.checked;for(let k=a;k<=b;k++){all[k].checked=on;cqPut(all[k],on);}
+      if(window.getSelection){const s=window.getSelection();if(s.removeAllRanges)s.removeAllRanges();}
+      cqAnchor=id;cqCount();return;}}
+  cqPut(el,el.checked);cqAnchor=id;cqCount();}
+function cqAllModal(el){document.querySelectorAll('#modalBody .cq-rowck').forEach(c=>{c.checked=el.checked;cqPut(c,el.checked);});cqAnchor=null;cqCount();}
 function cqOpen(html){document.getElementById('cqBody').innerHTML=html;document.getElementById('cqOverlay').style.display='flex';}
 function cqClose(){if(cqPoll){clearInterval(cqPoll);cqPoll=null;}document.getElementById('cqOverlay').style.display='none';}
 async function cqLogRows(phase){try{const r=await fetch(SUPA_URL+'/rest/v1/ia_verification_log?job_id=eq.'+cqJob+'&phase=eq.'+phase+'&select=id,lead_id,lead_name,status,detail&order=id&limit=5000',{headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON}});return r.ok?await r.json():[];}catch(e){return [];}}
 function cqBadge(s){const M={ready:['READY TO QUEUE','#22c55e'],already_called:['ALREADY CALLED','#eab308'],not_owner:['NOT AI-OWNED','#a855f7'],error:['ERROR','#ef4444'],moved:['SENT','#22c55e'],move_error:['ERROR','#ef4444']};const a=M[s]||[s,'#64748b'];return '<span class="iav-badge" style="background:'+a[1]+'22;color:'+a[1]+'">'+a[0]+'</span>';}
 async function cqStart(){
-  const sel=[...cqSel.entries()];
+  const sel=[...cqSel.entries()].filter(function(e){return /^[0-9]{8,}$/.test(''+e[0]);});
   if(!sel.length)return;
   cqJob='cq-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);
   const total=sel.length,CH=50;
